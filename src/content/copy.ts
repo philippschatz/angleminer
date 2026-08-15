@@ -52,10 +52,10 @@ export const start = {
 
   // Die Headline ist in vier Teile zerlegt, weil zwei davon farbig
   // hinterlegt sind. Reihenfolge im Satz: teil1 → markiert1 → teil2 → markiert2
-  h1Teil1: "Hol dir Ad-Angles in der",
-  h1Markiert1: "Stimme deiner Kunden,",
-  h1Teil2: "die wirklich",
-  h1Markiert2: "konvertieren",
+  h1Teil1: "Hol dir",
+  h1Markiert1: "Ad-Angles",
+  h1Teil2: "in der Stimme",
+  h1Markiert2: "deiner Kunden.",
 
   subline:
     "2.000 Kundenbewertungen rein, 10 belegte Ad-Angles raus — mit Zitaten, Zahlen und Hooks. Das Dokument, das du Agentur oder Creator in die Hand drückst.",
