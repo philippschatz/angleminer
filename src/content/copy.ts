@@ -53,7 +53,7 @@ export const start = {
 
   // Die Headline ist in vier Teile zerlegt, weil zwei davon farbig
   // hinterlegt sind. Reihenfolge im Satz: teil1 → markiert1 → teil2 → markiert2
-  h1Teil1: "Hol dir",
+  h1Teil1: "Hol dir authentische",
   h1Markiert1: "Ad-Angles",
   h1Teil2: "in der Stimme",
   h1Markiert2: "deiner Kunden.",
