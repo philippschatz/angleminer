@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Archivo, Archivo_Black } from "next/font/google";
+import { meta } from "@/content/copy";
 import "./globals.css";
 
 const archivo = Archivo({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-archivo" });
 const archivoBlack = Archivo_Black({ subsets: ["latin"], weight: "400", variable: "--font-archivo-black" });
 
 export const metadata: Metadata = {
-  title: "Angle Miner — Deine Reviews wissen, was verkauft",
-  description:
-    "Lade den CSV-Export deiner Reviews hoch und bekomme in Minuten eine belegte Angle-Map, Objection-Bank und Scrollstopper-Zitate. Für DTC-Brands im DACH-Raum.",
+  title: meta.titel,
+  description: meta.beschreibung,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

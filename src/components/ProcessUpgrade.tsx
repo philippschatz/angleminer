@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { report as t } from "@/content/copy";
 
 // Nach der Zahlung: stößt das LLM-Upgrade an und lädt die Seite neu, wenn es fertig ist.
 export default function ProcessUpgrade({ reportId }: { reportId: string }) {
@@ -36,7 +37,7 @@ export default function ProcessUpgrade({ reportId }: { reportId: string }) {
   return (
     <div className="mb-6 flex items-center gap-3 rounded-2xl border-[3px] border-ink bg-pop-mint px-5 py-4 text-sm font-bold shadow-pop-sm print:hidden">
       <span className="inline-block h-3 w-3 animate-pulse rounded-full border-2 border-ink bg-pop-yellow" />
-      Zahlung erhalten! Die Tiefenanalyse läuft (jede Review wird einzeln getaggt) — die Seite aktualisiert sich automatisch, dauert 1–5 Minuten.
+      {t.verarbeitungLaeuft}
     </div>
   );
 }

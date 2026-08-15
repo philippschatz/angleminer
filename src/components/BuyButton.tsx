@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { report as t } from "@/content/copy";
 
+// Texte: src/content/copy.ts unter "report"
 export default function BuyButton({ reportId }: { reportId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,10 +18,10 @@ export default function BuyButton({ reportId }: { reportId: string }) {
         body: JSON.stringify({ reportId }),
       });
       const json = await res.json();
-      if (!res.ok || !json.url) { setError(json.error ?? "Checkout fehlgeschlagen."); setBusy(false); return; }
+      if (!res.ok || !json.url) { setError(json.error ?? t.kaufFehler); setBusy(false); return; }
       window.location.href = json.url;
     } catch {
-      setError("Netzwerkfehler — bitte nochmal versuchen.");
+      setError(t.kaufFehlerNetzwerk);
       setBusy(false);
     }
   }
@@ -28,7 +30,7 @@ export default function BuyButton({ reportId }: { reportId: string }) {
     <div>
       <button onClick={buy} disabled={busy}
         className="pop-press rounded-2xl border-[3px] border-ink bg-pop-yellow px-8 py-4 font-bold shadow-pop disabled:opacity-50">
-        {busy ? "Weiter zu Stripe…" : "🔓 Freischalten für 49 €"}
+        {busy ? t.kaufButtonLaeuft : `🔓 ${t.kaufButton}`}
       </button>
       {error && <p className="mt-2 text-sm font-bold">{error}</p>}
     </div>
