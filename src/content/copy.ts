@@ -258,6 +258,42 @@ export const report = {
 };
 
 // ---------------------------------------------------------------------------
+//  NEWSLETTER-EINWILLIGUNG (Double-Opt-in)
+// ---------------------------------------------------------------------------
+//  ACHTUNG, rechtlich relevant: Die Checkbox darf NIEMALS vorangehakt sein,
+//  und der Text muss sagen, worum es geht und dass man jederzeit aussteigen
+//  kann. Ändere die Formulierung nur mit Bedacht.
+export const einwilligung = {
+  checkboxText:
+    "Schickt mir ab und zu Tipps zu Voice-of-Customer und Paid Social. Kein fester Rhythmus, Abmeldung mit einem Klick.",
+  checkboxHinweis:
+    "Du bekommst zuerst eine Mail mit einem Bestätigungslink. Erst danach schicken wir dir etwas.",
+
+  // Eigenständiges Feld in der Vorschau — für Leute, die (noch) nicht kaufen
+  vorschauTitel: "Noch nicht überzeugt?",
+  vorschauText:
+    "Dann lass dir zeigen, wie andere Marken aus ihren Bewertungen Anzeigen bauen. Ab und zu eine Mail, kein fester Rhythmus.",
+  vorschauPlatzhalter: "du@marke.de",
+  vorschauButton: "Eintragen",
+  vorschauButtonLaeuft: "Moment…",
+  vorschauDanke:
+    "Fast geschafft: Wir haben dir eine Mail mit einem Bestätigungslink geschickt. Erst mit dem Klick bist du dabei.",
+  vorschauFehler: "Das hat nicht geklappt. Bitte prüf die Adresse.",
+
+  // Landeseiten nach Klick auf den Link in der Mail
+  bestaetigtTitel: "Bestätigt!",
+  bestaetigtText:
+    "Du bist eingetragen. Wenn es wieder etwas Brauchbares gibt, hörst du von uns — und in jeder Mail steht ein Abmeldelink.",
+  abgemeldetTitel: "Abgemeldet.",
+  abgemeldetText:
+    "Du bekommst keine Werbe-Mails mehr von uns. Mails zu deinen gekauften Reports laufen davon unabhängig weiter.",
+  ungueltigTitel: "Link nicht mehr gültig",
+  ungueltigText:
+    "Dieser Link ist abgelaufen oder wurde schon benutzt. Trag dich einfach neu ein.",
+  zurStartseite: "Zur Startseite",
+};
+
+// ---------------------------------------------------------------------------
 //  KONTO & ANMELDUNG
 // ---------------------------------------------------------------------------
 export const konto = {
@@ -325,6 +361,15 @@ Dein Report bleibt dir erhalten:
 {link}
 
 Wenn du magst, versuch es später nochmal — dann meistens mit dem vollen Ergebnis.
+
+— Angle Miner`,
+
+  bestaetigenBetreff: "Bitte einmal bestätigen",
+  bestaetigenText: `Du möchtest ab und zu Post von Angle Miner bekommen. Bestätige das bitte einmal mit diesem Link:
+
+{link}
+
+Erst danach schicken wir dir etwas. Wenn du dich nicht eingetragen hast, ignoriere diese Mail einfach — dann passiert nichts.
 
 — Angle Miner`,
 

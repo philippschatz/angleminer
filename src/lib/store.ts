@@ -51,6 +51,19 @@ async function getPool(): Promise<PgPool> {
           expires_at TIMESTAMPTZ NOT NULL,
           used BOOLEAN NOT NULL DEFAULT FALSE
         );
+
+        -- Nachweis der Werbe-Einwilligung. angefragt_am = Checkbox gesetzt,
+        -- bestaetigt_am = Link in der Mail geklickt. Erst dann darf geworben
+        -- werden. widerrufen_am schliesst das wieder.
+        CREATE TABLE IF NOT EXISTS einwilligungen (
+          email TEXT PRIMARY KEY,
+          token TEXT NOT NULL,
+          quelle TEXT,
+          angefragt_am TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          bestaetigt_am TIMESTAMPTZ,
+          widerrufen_am TIMESTAMPTZ
+        );
+        CREATE INDEX IF NOT EXISTS einwilligungen_token_idx ON einwilligungen (token);
       `)
       .then(() => undefined);
   }
@@ -65,6 +78,7 @@ const DATA_DIR = path.join(process.cwd(), ".data");
 const REPORT_DIR = path.join(DATA_DIR, "reports");
 const KONTO_DIR = path.join(DATA_DIR, "konten");
 const TOKEN_DIR = path.join(DATA_DIR, "token");
+const EINWILLIGUNG_DIR = path.join(DATA_DIR, "einwilligungen");
 
 const sicher = (s: string) => /^[a-zA-Z0-9_-]+$/.test(s);
 const emailDatei = (email: string) => Buffer.from(email.toLowerCase()).toString("hex");
@@ -312,6 +326,90 @@ export async function tokenAnlegen(token: string, email: string, gueltigMinuten:
   await p.query(
     `INSERT INTO login_token (token, email, expires_at) VALUES ($1,$2,$3)`, [token, e, expiresAt]
   );
+}
+
+// ---------- Werbe-Einwilligung (Double-Opt-in) ----------
+
+export type Einwilligung = {
+  email: string;
+  token: string;
+  quelle?: string;
+  angefragtAm: string;
+  bestaetigtAm?: string;
+  widerrufenAm?: string;
+};
+
+/**
+ * Trägt eine Anfrage ein (Checkbox gesetzt). Wirbt noch NICHT — dafür muss
+ * erst der Link in der Bestätigungsmail geklickt werden.
+ * Gibt den Token für den Bestätigungslink zurück, oder null wenn die Adresse
+ * bereits bestätigt ist (dann keine zweite Mail).
+ */
+export async function einwilligungAnfragen(
+  email: string, token: string, quelle: string
+): Promise<string | null> {
+  const e = email.toLowerCase();
+  const jetzt = new Date().toISOString();
+
+  if (!usePg) {
+    const vorhanden = await fsLesen<Einwilligung>(EINWILLIGUNG_DIR, emailDatei(e));
+    if (vorhanden?.bestaetigtAm && !vorhanden.widerrufenAm) return null;
+    await fsSchreiben(EINWILLIGUNG_DIR, emailDatei(e), {
+      email: e, token, quelle, angefragtAm: jetzt,
+    } satisfies Einwilligung);
+    return token;
+  }
+
+  const p = await getPool();
+  const res = await p.query(
+    `INSERT INTO einwilligungen (email, token, quelle)
+     VALUES ($1,$2,$3)
+     ON CONFLICT (email) DO UPDATE
+       SET token = $2, quelle = $3, angefragt_am = NOW(), widerrufen_am = NULL
+       WHERE einwilligungen.bestaetigt_am IS NULL OR einwilligungen.widerrufen_am IS NOT NULL
+     RETURNING token`,
+    [e, token, quelle]
+  );
+  return res.rows.length > 0 ? (res.rows[0].token as string) : null;
+}
+
+/** Klick auf den Bestätigungslink. Ab jetzt darf geworben werden. */
+export async function einwilligungBestaetigen(token: string): Promise<boolean> {
+  if (!sicher(token)) return false;
+  if (!usePg) {
+    const alle = await fsAlle<Einwilligung>(EINWILLIGUNG_DIR);
+    const t = alle.find((x) => x.token === token);
+    if (!t || t.bestaetigtAm) return false;
+    await fsSchreiben(EINWILLIGUNG_DIR, emailDatei(t.email), {
+      ...t, bestaetigtAm: new Date().toISOString(), widerrufenAm: undefined,
+    });
+    return true;
+  }
+  const p = await getPool();
+  const res = await p.query(
+    `UPDATE einwilligungen SET bestaetigt_am = NOW(), widerrufen_am = NULL
+      WHERE token = $1 AND bestaetigt_am IS NULL RETURNING email`, [token]
+  );
+  return res.rows.length > 0;
+}
+
+/** Abmeldelink. Muss in jeder Werbe-Mail stehen. */
+export async function einwilligungWiderrufen(token: string): Promise<boolean> {
+  if (!sicher(token)) return false;
+  if (!usePg) {
+    const alle = await fsAlle<Einwilligung>(EINWILLIGUNG_DIR);
+    const t = alle.find((x) => x.token === token);
+    if (!t) return false;
+    await fsSchreiben(EINWILLIGUNG_DIR, emailDatei(t.email), {
+      ...t, widerrufenAm: new Date().toISOString(),
+    });
+    return true;
+  }
+  const p = await getPool();
+  const res = await p.query(
+    `UPDATE einwilligungen SET widerrufen_am = NOW() WHERE token = $1 RETURNING email`, [token]
+  );
+  return res.rows.length > 0;
 }
 
 /** Löst den Token ein. Gibt die E-Mail zurück, oder null bei ungültig/abgelaufen/verbraucht. */

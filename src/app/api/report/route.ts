@@ -7,6 +7,7 @@ import { RawReview } from "@/lib/pipeline/types";
 import { saveReport } from "@/lib/store";
 import { MAX_REVIEWS, MIN_NACH_REINIGUNG } from "@/lib/pipeline/browser";
 import { fehler, upload as uploadCopy } from "@/content/copy";
+import { einwilligungStarten } from "@/lib/newsletter";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -29,6 +30,7 @@ const BodySchema = z.object({
   brandName: z.string().max(80),
   category: z.string().max(80),
   email: z.string().max(200).optional(),
+  werbeEinwilligung: z.boolean().optional(),
   cleanStats: z.object({
     input: z.number().int().min(0),
     kept: z.number().int().min(0),
@@ -77,6 +79,16 @@ export async function POST(req: NextRequest) {
       rawReviews: roh,
       createdAt: new Date().toISOString(),
     });
+
+    // Werbe-Einwilligung ist vom Kauf getrennt: eigene Zustimmung, eigene
+    // Bestätigungsmail. Scheitert sie, darf das den Kauf nicht aufhalten.
+    if (body.werbeEinwilligung && body.email) {
+      try {
+        await einwilligungStarten(body.email, "kauf", req.nextUrl.origin);
+      } catch (e) {
+        console.error("Einwilligung konnte nicht gestartet werden", e);
+      }
+    }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || req.nextUrl.origin;
 

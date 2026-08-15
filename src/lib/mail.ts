@@ -67,6 +67,11 @@ export function erstattungsMail(an: string, marke: string, link: string): Promis
   );
 }
 
+/** Double-Opt-in: ohne Klick auf diesen Link darf nicht geworben werden. */
+export function einwilligungBestaetigenMail(an: string, link: string): Promise<MailErgebnis> {
+  return versendenUeberAnbieter(an, mails.bestaetigenBetreff, fill(mails.bestaetigenText, { link }));
+}
+
 export function ablaufWarnungMail(an: string, tage: number, link: string): Promise<MailErgebnis> {
   return versendenUeberAnbieter(
     an,

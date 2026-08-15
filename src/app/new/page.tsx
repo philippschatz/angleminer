@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { fehler, fill, report as reportCopy, upload } from "@/content/copy";
+import { einwilligung, fehler, fill, report as reportCopy, upload } from "@/content/copy";
 import {
   MAX_REVIEWS, VorschauErgebnis, VorschauFehler, vorschauBauen,
 } from "@/lib/pipeline/browser";
 import ReportView from "@/components/ReportView";
+import NewsletterBox from "@/components/NewsletterBox";
 
 // Alle Texte dieser Seite stehen in src/content/copy.ts unter "upload".
 //
@@ -19,6 +20,9 @@ export default function NewReport() {
   const [brandName, setBrandName] = useState("");
   const [category, setCategory] = useState("");
   const [email, setEmail] = useState("");
+  // Werbe-Einwilligung. Startet IMMER auf false — eine vorangehakte Box wäre
+  // keine wirksame Einwilligung.
+  const [werbung, setWerbung] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [pasted, setPasted] = useState("");
   const [mode, setMode] = useState<"file" | "paste">("file");
@@ -90,8 +94,15 @@ export default function NewReport() {
         <ReportView
           data={ergebnis.vorschau}
           unlocked={false}
-          kaufBereich={<FreischaltenButton ergebnis={ergebnis} brandName={brandName} category={category} email={email} />}
+          kaufBereich={
+            <FreischaltenButton
+              ergebnis={ergebnis} brandName={brandName} category={category}
+              email={email} werbung={werbung}
+            />
+          }
         />
+
+        <NewsletterBox />
       </main>
     );
   }
@@ -123,6 +134,21 @@ export default function NewReport() {
           </span>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={upload.platzhalterEmail} className={inputCls} />
         </label>
+
+        {email.trim().length > 0 && (
+          <div className="rounded-2xl border-[3px] border-ink bg-white px-5 py-4 shadow-pop-sm">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox" checked={werbung} onChange={(e) => setWerbung(e.target.checked)}
+                className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#2b45ff]"
+              />
+              <span className="text-sm font-medium">{einwilligung.checkboxText}</span>
+            </label>
+            {werbung && (
+              <p className="mt-2 pl-8 text-xs font-medium opacity-70">{einwilligung.checkboxHinweis}</p>
+            )}
+          </div>
+        )}
 
         <div>
           <div className="mb-3 flex gap-2 text-sm font-bold">
@@ -172,12 +198,13 @@ export default function NewReport() {
  * Gerät wechselt oder abbricht, verliert seine Analyse dadurch nicht.
  */
 function FreischaltenButton({
-  ergebnis, brandName, category, email,
+  ergebnis, brandName, category, email, werbung,
 }: {
   ergebnis: VorschauErgebnis;
   brandName: string;
   category: string;
   email: string;
+  werbung: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -193,6 +220,7 @@ function FreischaltenButton({
           brandName,
           category,
           email: email || undefined,
+          werbeEinwilligung: werbung,
           cleanStats: ergebnis.cleanStats,
           reviews: ergebnis.upload,
         }),
