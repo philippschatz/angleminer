@@ -23,7 +23,7 @@ export default function Home() {
         <span className="font-heavy absolute right-8 top-10 hidden rotate-6 rounded-full border-[2.5px] border-ink bg-pop-pink px-4 py-2 text-xs uppercase shadow-pop-sm sm:inline-block">
           {start.stickerOben}
         </span>
-        <span className="font-heavy absolute right-32 top-56 hidden -rotate-3 rounded-full border-[2.5px] border-ink bg-pop-mint px-4 py-2 text-xs uppercase shadow-pop-sm sm:inline-block">
+        <span className="font-heavy absolute right-8 top-24 hidden -rotate-3 rounded-full border-[2.5px] border-ink bg-pop-mint px-4 py-2 text-xs uppercase shadow-pop-sm sm:inline-block">
           {start.stickerUnten}
         </span>
         <h1 className="font-heavy mb-6 max-w-3xl text-4xl uppercase leading-[1.05] tracking-tight sm:text-6xl">
