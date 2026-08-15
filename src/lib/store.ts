@@ -412,6 +412,25 @@ export async function einwilligungWiderrufen(token: string): Promise<boolean> {
   return res.rows.length > 0;
 }
 
+/** Räumt verbrauchte und abgelaufene Anmelde-Token weg. Datensparsamkeit. */
+export async function tokenAufraeumen(): Promise<number> {
+  const jetzt = new Date().toISOString();
+  if (!usePg) {
+    const alle = await fsAlle<TokenSatz>(TOKEN_DIR);
+    let weg = 0;
+    for (const t of alle) {
+      if (t.used || t.expiresAt < jetzt) {
+        await fs.rm(path.join(TOKEN_DIR, `${t.token}.json`), { force: true });
+        weg++;
+      }
+    }
+    return weg;
+  }
+  const p = await getPool();
+  const res = await p.query(`DELETE FROM login_token WHERE used = TRUE OR expires_at < NOW()`);
+  return res.rowCount ?? 0;
+}
+
 /** Löst den Token ein. Gibt die E-Mail zurück, oder null bei ungültig/abgelaufen/verbraucht. */
 export async function tokenEinloesen(token: string): Promise<string | null> {
   if (!sicher(token)) return null;

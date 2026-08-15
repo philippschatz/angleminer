@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { abgelaufeneReports, deleteReport, saveReport, unbezahltAelterAls } from "@/lib/store";
+import {
+  abgelaufeneReports, deleteReport, saveReport, tokenAufraeumen, unbezahltAelterAls,
+} from "@/lib/store";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -42,8 +44,11 @@ export async function GET(req: NextRequest) {
     await saveReport(r);
   }
 
+  const tokenWeg = await tokenAufraeumen();
+
   return NextResponse.json({
     abgebrocheneKaeufeGeloescht: verwaist.length,
     zitateEntfernt: abgelaufen.length,
+    tokenAufgeraeumt: tokenWeg,
   });
 }
