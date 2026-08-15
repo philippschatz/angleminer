@@ -125,23 +125,38 @@ function vary(body) {
 const rows = [["title", "body", "rating", "reviewer_name", "review_date", "product_title"]];
 const start = new Date("2025-06-01");
 const end = new Date("2026-08-01");
-const lateStart = new Date("2026-02-01"); // Passform-Nennungen steigen im 2. Zeitraum
+// Die Trendrechnung im Report halbiert die Zeitspanne und vergleicht beide Hälften.
+// Damit ein gewollter Anstieg dort ankommt, muss die Trennlinie hier exakt auf der
+// Mitte liegen und die beiden Fenster müssen disjunkt sein — sonst streuen die
+// "frühen" Reviews bis ins späte Fenster und verwässern den Effekt.
+const lateStart = new Date("2026-01-01"); // Mitte von start..end
+
+// Der Report zählt Nennungen je THEMA, nicht Reviews je Pool — und Passform-Nennungen
+// entstehen quer durch fast alle Pools ("Super Qualität, super Passform" steckt in
+// kurz_pos, "fällt eng aus" in groesse_neg). Steuert man das Datum pro Pool, verschiebt
+// man nur eine Minderheit der Nennungen und der Trend verpufft. Deshalb hängt das Datum
+// am Inhalt. Das Muster spiegelt die Passform-Keywords des Taggers grob wider; ändert
+// sich dort die Themenerkennung, muss es hier nachgezogen werden.
+const PASSFORM_RE = /passform|sitzt|sitz\b|passt |schnitt|eng\b|drückt|einschneid|verrutscht|hält\b|zwickt|kneift/i;
+const LATE_SHARE_PASSFORM = 0.62; // Passform wird im 2. Zeitraum spürbar häufiger genannt
+const LATE_SHARE_REST = 0.45;
 
 function push(body, rating, opts = {}) {
   const title = opts.title ?? "";
+  const late = rand() < (PASSFORM_RE.test(body) ? LATE_SHARE_PASSFORM : LATE_SHARE_REST);
   rows.push([
     title,
     body,
     String(rating),
     pick(NAMES),
-    opts.late ? dateBetween(lateStart, end) : dateBetween(start, end),
+    late ? dateBetween(lateStart, end) : dateBetween(start, lateStart),
     pick(PRODUCTS),
   ]);
 }
 
 // Verteilung: ~620 Reviews
 const plan = [
-  ["passform_pos", 118, 5, { lateShare: 0.65 }],
+  ["passform_pos", 118, 5, {}],
   ["material_pos", 96, 5, {}],
   ["haltbarkeit_pos", 64, 5, {}],
   ["haltbarkeit_neg", 26, 2, {}],
@@ -159,15 +174,14 @@ const plan = [
 ];
 
 const seen = new Set();
-for (const [pool, n, rating, opts] of plan) {
+for (const [pool, n, rating] of plan) {
   for (let i = 0; i < n; i++) {
     let body = vary(pick(POOLS[pool]));
     let guard = 0;
     while (seen.has(body) && guard++ < 20) body = vary(pick(POOLS[pool]));
     seen.add(body);
-    const late = opts.lateShare ? rand() < opts.lateShare : rand() < 0.45;
     const r = rating === 5 && rand() < 0.2 ? 4 : rating;
-    push(body, r, { late });
+    push(body, r);
   }
 }
 // PII-Fälle
