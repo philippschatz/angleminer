@@ -14,10 +14,19 @@ VoC-Micro-SaaS: Kunde lädt Review-CSV hoch → kostenlose Heuristik-Vorschau �
 
 ## Architektur (Kurzfassung)
 
-- `src/lib/pipeline/` — das Herz: `parse.ts` (CSV-Spalten-Heuristik) → `clean.ts` (Dedupe/Junk/PII/Seeding) → `tagger.ts` (Heuristik + Claude-Batches) → `aggregate.ts` (deterministische Zählung) → `enhance.ts` (ein LLM-Call für Titel/Hooks)
+- `src/lib/pipeline/` — das Herz: `parse.ts` (CSV-Spalten-Heuristik) → `clean.ts` (Dedupe/Junk/PII/Seeding) → `tagger.ts` (regelbasiert, läuft auch im Browser) bzw. `tagger-llm.ts` (Claude-Batches, nur Server) → `aggregate.ts` (deterministische Zählung) → `enhance.ts` (ein LLM-Call für Titel/Hooks)
+- `src/lib/pipeline/browser.ts` — fasst parse→clean→tagger→aggregate zu der Vorschau zusammen, die **im Browser des Kunden** läuft, und liefert daneben `upload[]` mit exakt den Feldern, die den Rechner verlassen dürfen: `id`, `text`, `rating`, `date`. Keine Namen, kein Produkt.
+- `src/content/copy.ts` — **sämtliche** sichtbaren Texte. Nie Copy direkt in Komponenten schreiben.
 - `src/lib/store.ts` — Storage-Adapter: Postgres via DATABASE_URL, sonst Dateisystem `.data/`
-- API-Flow: `/api/analyze` (Upload→Preview) · `/api/checkout` + `/api/stripe-webhook` (Zahlung) · `/api/process` (LLM-Upgrade nach Zahlung, maxDuration 300) · `/api/status` (Polling)
-- Report-Gating in `src/app/r/[id]/page.tsx`: unbezahlt = Vorschau (Angle 1 + Locked Sections), bezahlt = voll
+- API-Flow: `/api/report` (Kauf-Klick: bereinigte Daten rein, Report anlegen, Stripe-Session) · `/api/checkout` (Zweitversuch nach Abbruch, von `/r/[id]`) · `/api/stripe-webhook` (Zahlung) · `/api/process` (LLM-Upgrade nach Zahlung, maxDuration 300) · `/api/status` (Polling)
+- Report-Gating in `src/app/r/[id]/page.tsx`: unbezahlt = Vorschau (Angle 1 + Locked Sections), bezahlt = voll. `ReportView` bekommt den Kauf-Button über die Prop `kaufBereich` — auf `/new` legt er den Report erst an, auf `/r/[id]` existiert er schon.
+
+## User Journey (Stand 15.08.2026)
+
+1. `/new` — Datei oder Text rein. Einlesen, Putzen, PII-Scrub und Gratis-Vorschau laufen **vollständig im Browser**. Kein Serverkontakt, keine Report-ID, kein Upload.
+2. Klick auf „Freischalten" — **jetzt erst** gehen die bereinigten Bewertungen an `/api/report`. Bewusst vor der Weiterleitung zu Stripe, damit Gerätewechsel oder Abbruch die Analyse nicht vernichten. Daten abgebrochener Käufe werden nach 24 h weggeräumt (noch zu bauen).
+3. Stripe → Webhook schaltet frei → Tiefenanalyse serverseitig (noch zu bauen: Anstoß per Webhook + Cron, gechunkt) → Zustellung per Mail.
+4. Report lebt im Kundenkonto, das mit dem Kauf entsteht (noch zu bauen).
 
 ## Unverhandelbare Regeln
 

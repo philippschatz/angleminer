@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getReport, saveReport } from "@/lib/store";
-import { llmTag } from "@/lib/pipeline/tagger";
+import { llmTag } from "@/lib/pipeline/tagger-llm";
 import { buildReport } from "@/lib/pipeline/aggregate";
 import { enhanceReport } from "@/lib/pipeline/enhance";
 
@@ -30,11 +30,11 @@ export async function POST(req: NextRequest) {
   await saveReport(report);
 
   try {
-    const tagged = await llmTag(report.rawReviews);
-    if (tagged) {
+    const ergebnis = await llmTag(report.rawReviews);
+    if (ergebnis) {
       let data = buildReport({
         id: report.id,
-        tagged,
+        tagged: ergebnis.tagged,
         cleanStats: report.data.cleanStats,
         brandName: report.data.brandName,
         category: report.data.category,

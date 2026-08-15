@@ -4,6 +4,7 @@ import { getReport, markPaid } from "@/lib/store";
 import ReportView from "@/components/ReportView";
 import ProcessUpgrade from "@/components/ProcessUpgrade";
 import PrintButton from "@/components/PrintButton";
+import BuyButton from "@/components/BuyButton";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,7 @@ export default async function ReportPage({
         {unlocked && <PrintButton />}
       </nav>
       {needsUpgrade && <ProcessUpgrade reportId={id} />}
-      <ReportView data={report.data} unlocked={unlocked} />
+      <ReportView data={report.data} unlocked={unlocked} kaufBereich={<BuyButton reportId={id} />} />
     </main>
   );
 }

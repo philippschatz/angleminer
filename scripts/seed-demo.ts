@@ -3,7 +3,8 @@
 import { readFileSync } from "fs";
 import { parseReviewsCsv } from "../src/lib/pipeline/parse";
 import { cleanReviews } from "../src/lib/pipeline/clean";
-import { heuristicTag, llmTag } from "../src/lib/pipeline/tagger";
+import { heuristicTag } from "../src/lib/pipeline/tagger";
+import { llmTag } from "../src/lib/pipeline/tagger-llm";
 import { buildReport } from "../src/lib/pipeline/aggregate";
 import { enhanceReport } from "../src/lib/pipeline/enhance";
 import { saveReport } from "../src/lib/store";
@@ -15,7 +16,7 @@ async function main() {
   const { kept, stats } = cleanReviews(parsed.reviews);
   console.log("clean stats:", stats);
 
-  const tagged = (await llmTag(kept)) ?? heuristicTag(kept);
+  const tagged = (await llmTag(kept))?.tagged ?? heuristicTag(kept);
   console.log(`getaggt via: ${tagged[0].taggedBy}`);
 
   let data = buildReport({

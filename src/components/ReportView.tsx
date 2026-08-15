@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { Quote, ReportData, THEME_LABELS } from "@/lib/pipeline/types";
 import { fill, report as t } from "@/content/copy";
-import BuyButton from "./BuyButton";
 
 // Alle Texte dieses Reports stehen in src/content/copy.ts unter "report".
 
@@ -53,7 +53,17 @@ function LockedCard({ title, note }: { title: string; note: string }) {
 
 const KPI_BGS = ["bg-pop-yellow -rotate-1", "bg-white rotate-1", "bg-pop-mint -rotate-1", "bg-pop-pink rotate-1"];
 
-export default function ReportView({ data, unlocked }: { data: ReportData; unlocked: boolean }) {
+export default function ReportView({
+  data,
+  unlocked,
+  kaufBereich,
+}: {
+  data: ReportData;
+  unlocked: boolean;
+  /** Kauf-Button für die Vorschau. Unterscheidet sich je nachdem, ob der Report
+   *  schon angelegt ist (/r/…) oder erst beim Klick entsteht (/new). */
+  kaufBereich?: ReactNode;
+}) {
   const previewAngles = unlocked ? data.angles : data.angles.slice(0, 1);
   const s = data.cleanStats;
   const kpis = [
@@ -139,7 +149,7 @@ export default function ReportView({ data, unlocked }: { data: ReportData; unloc
             <p className="mx-auto mb-6 max-w-md font-medium">
               {fill(t.paywallText, { anzahl: data.angles.length, scrollstopper: data.scrollstoppers.length })}
             </p>
-            <div className="flex justify-center"><BuyButton reportId={data.id} /></div>
+            <div className="flex justify-center">{kaufBereich}</div>
             <p className="mt-4 text-xs font-bold">{t.paywallFussnote}</p>
           </div>
           <LockedCard title={t.gesperrtEinwaendeTitel} note={fill(t.gesperrtEinwaendeNotiz, { anzahl: data.objections.length })} />

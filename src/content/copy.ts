@@ -134,10 +134,19 @@ export const upload = {
   textPlatzhalter: "Eine Bewertung pro Absatz einfügen…",
 
   buttonBereit: "Kostenlos analysieren",
-  buttonLaeuft: "Analysiere… (bis zu 1 Minute)",
+  buttonLaeuft: "Analysiere…",
 
   datenschutzHinweis:
-    "Von Namen bleibt nur der Vorname. E-Mail-Adressen, Bestellnummern und Links werden entfernt, bevor überhaupt analysiert wird. Deine Datei wird danach gelöscht.",
+    "Die Analyse läuft in deinem Browser. Deine Datei wird nicht hochgeladen — Namen, E-Mail-Adressen und Bestellnummern werden auf deinem Rechner entfernt, bevor überhaupt etwas zu uns geht.",
+
+  // Vorschau, die direkt auf dieser Seite erscheint
+  vorschauBadge: "Deine Vorschau · auf deinem Rechner gerechnet",
+  vorschauHinweisLokal:
+    "Diese Vorschau ist auf deinem Rechner entstanden. Bei uns liegt bis jetzt nichts. Erst wenn du auf Freischalten klickst, gehen Bewertungstext, Sterne und Datum zu uns — ohne Namen.",
+  vorschauNeueDatei: "Andere Datei nehmen",
+  vorschauAbgeschnitten:
+    "Hinweis: Deine Datei enthält mehr als {max} Bewertungen. Analysiert wurden die ersten {max}, die restlichen {rest} bleiben unberücksichtigt.",
+  vorschauUploadLaeuft: "Daten werden übertragen…",
 
   // Wird eingesetzt, wenn jemand die Felder leer lässt — steht dann im Report
   standardMarke: "Deine Marke",
@@ -260,4 +269,6 @@ export const fehler = {
     "Nach dem Aussortieren von Doppelten und leeren Einträgen bleiben zu wenige echte Bewertungen übrig.",
   analyseFehlgeschlagen:
     "Die Analyse hat nicht geklappt. Prüfe, ob die Datei wirklich ein Bewertungs-Export im CSV-Format ist.",
+  uploadUngueltig:
+    "Die übertragenen Daten waren unvollständig. Lade die Seite neu und versuche es nochmal.",
 };
