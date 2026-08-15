@@ -33,7 +33,7 @@ Pro Review vergibst du:
 
 Sei streng bei adReady und scrollstopper: lieber wenige gute als viele mittelmäßige.`;
 
-const BATCH_SIZE = 40;
+export const BATCH_SIZE = 40;
 const CONCURRENCY = 4;
 
 /** Einziger Ort, an dem das Modell angesprochen wird. Rückgabe: reiner Text. */
@@ -88,43 +88,64 @@ async function tagBatch(batch: RawReview[]): Promise<Map<string, ReviewTags>> {
   throw new Error("unreachable");
 }
 
-export type LlmTagErgebnis = {
-  tagged: TaggedReview[];
-  /** Wie viele Reviews die KI wirklich getaggt hat (Rest: Heuristik-Rückfall). */
+export type TeilErgebnis = {
+  /** Tags der in diesem Durchgang verarbeiteten Reviews. */
+  tags: Map<string, ReviewTags>;
+  /** Wie viele davon wirklich von der KI kamen (Rest: Regelwerk-Rückfall). */
   vonKi: number;
 };
 
-export async function llmTag(
+/**
+ * Taggt die übergebenen Reviews. Zwischen zwei Runden wird `abbrechen()`
+ * gefragt — so kann der Aufrufer aufhören, bevor die Serverfunktion in ihr
+ * Zeitlimit läuft, und beim nächsten Durchgang dort weitermachen.
+ *
+ * Reviews, deren Batch scheitert, bekommen das Regelwerk-Ergebnis. Sie zählen
+ * dann nicht als "von der KI gesehen" — daraus entsteht später die Entscheidung
+ * über die automatische Erstattung.
+ */
+export async function tagReviews(
   reviews: RawReview[],
-  onProgress?: (done: number, total: number) => void
-): Promise<LlmTagErgebnis | null> {
-  if (!llmVerfuegbar()) return null;
-
+  abbrechen?: () => boolean
+): Promise<TeilErgebnis> {
   const batches: RawReview[][] = [];
   for (let i = 0; i < reviews.length; i += BATCH_SIZE) batches.push(reviews.slice(i, i + BATCH_SIZE));
 
-  const results = new Map<string, ReviewTags>();
-  let done = 0;
+  const tags = new Map<string, ReviewTags>();
+  let vonKi = 0;
+
   for (let i = 0; i < batches.length; i += CONCURRENCY) {
+    if (abbrechen?.()) break;
     const slice = batches.slice(i, i + CONCURRENCY);
     const settled = await Promise.allSettled(slice.map((b) => tagBatch(b)));
     settled.forEach((s, j) => {
       if (s.status === "fulfilled") {
-        for (const [id, tags] of s.value) results.set(id, tags);
+        for (const [id, t] of s.value) { tags.set(id, t); vonKi++; }
+        // Reviews, die das Modell im Batch ausgelassen hat, nicht liegen lassen
+        for (const r of slice[j]) if (!tags.has(r.id)) tags.set(r.id, heuristicTagOne(r));
       } else {
-        // Batch-Fehler: Heuristik-Fallback für genau diese Reviews
-        for (const r of slice[j]) results.set(r.id, heuristicTagOne(r));
+        for (const r of slice[j]) tags.set(r.id, heuristicTagOne(r));
       }
-      done += slice[j].length;
     });
-    onProgress?.(Math.min(done, reviews.length), reviews.length);
   }
 
+  return { tags, vonKi };
+}
+
+export type LlmTagErgebnis = {
+  tagged: TaggedReview[];
+  vonKi: number;
+};
+
+/** Komplettlauf in einem Rutsch — für Skripte wie seed-demo. */
+export async function llmTag(reviews: RawReview[]): Promise<LlmTagErgebnis | null> {
+  if (!llmVerfuegbar()) return null;
+  const { tags, vonKi } = await tagReviews(reviews);
   return {
-    vonKi: results.size,
+    vonKi,
     tagged: reviews.map((r) => ({
       ...r,
-      tags: results.get(r.id) ?? heuristicTagOne(r),
+      tags: tags.get(r.id) ?? heuristicTagOne(r),
       complianceFlags: complianceFlagsFor(`${r.title ?? ""} ${r.body}`),
       taggedBy: "llm" as const,
     })),

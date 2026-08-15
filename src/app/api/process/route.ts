@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getReport, saveReport } from "@/lib/store";
-import { llmTag } from "@/lib/pipeline/tagger-llm";
-import { buildReport } from "@/lib/pipeline/aggregate";
-import { enhanceReport } from "@/lib/pipeline/enhance";
+import { getReport } from "@/lib/store";
+import { verarbeitungsSchritt } from "@/lib/verarbeitung";
 
 export const runtime = "nodejs";
-export const maxDuration = 300; // LLM-Tagging von bis zu 5.000 Reviews
+export const maxDuration = 300;
 
-// Nach Zahlung: Heuristik-Report → LLM-Report upgraden.
+// Sofortstart, wenn der Käufer nach der Zahlung noch auf der Seite ist —
+// dann muss er nicht auf den nächsten Zeitplan-Lauf warten.
+//
+// Kein notwendiger Bestandteil: Schließt er den Tab, holt der Zeitplan alles
+// nach. Deshalb wird hier auch nichts mehr in einen Hängezustand geschrieben,
+// aus dem nichts mehr herauskommt.
+
+const BUDGET_MS = 280_000;
+
 export async function POST(req: NextRequest) {
   const { id } = (await req.json()) as { id?: string };
   if (!id) return NextResponse.json({ error: "id fehlt" }, { status: 400 });
@@ -16,42 +22,17 @@ export async function POST(req: NextRequest) {
   if (!report) return NextResponse.json({ error: "nicht gefunden" }, { status: 404 });
   if (!report.paid) return NextResponse.json({ error: "nicht bezahlt" }, { status: 402 });
   if (report.status === "ready") return NextResponse.json({ status: "ready" });
-  if (report.status === "processing") return NextResponse.json({ status: "processing" });
-
-  // Ohne LLM-Key oder ohne Rohdaten: Heuristik-Report ist der finale Report.
-  if (!process.env.ANTHROPIC_API_KEY || !report.rawReviews?.length) {
-    report.status = "ready";
-    report.rawReviews = undefined;
-    await saveReport(report);
-    return NextResponse.json({ status: "ready" });
-  }
-
-  report.status = "processing";
-  await saveReport(report);
 
   try {
-    const ergebnis = await llmTag(report.rawReviews);
-    if (ergebnis) {
-      let data = buildReport({
-        id: report.id,
-        tagged: ergebnis.tagged,
-        cleanStats: report.data.cleanStats,
-        brandName: report.data.brandName,
-        category: report.data.category,
-        email: report.email,
-        llmEnhanced: false,
-      });
-      data = await enhanceReport(data);
-      report.data = data;
-    }
-    report.status = "ready";
-    report.rawReviews = undefined; // Datensparsamkeit: Rohdaten nach Verarbeitung löschen
-    await saveReport(report);
-    return NextResponse.json({ status: "ready" });
+    const res = await verarbeitungsSchritt(report, BUDGET_MS);
+    return NextResponse.json({
+      status: res.status,
+      erledigt: res.erledigt,
+      gesamt: res.gesamt,
+    });
   } catch (e) {
-    console.error("process failed", e);
-    report.status = "ready"; // Heuristik-Report bleibt gültig — kein kaputter Kaufflow
-    await saveReport(report);
-    return NextResponse.json({ status: "ready", degraded: true });
+    console.error("Verarbeitung fehlgeschlagen", id, e);
+    // Der Zeitplan versucht es weiter — der Report bleibt gültig.
+    return NextResponse.json({ status: "processing", degraded: true });
   }
 }

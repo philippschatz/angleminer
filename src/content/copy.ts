@@ -44,6 +44,7 @@ export const meta = {
 // ---------------------------------------------------------------------------
 export const start = {
   navBeispiel: "Beispiel",
+  navAnmelden: "Anmelden",
   navCta: "Report erstellen",
 
   // Die beiden schrägen Sticker rechts oben im Hero
@@ -232,7 +233,8 @@ export const report = {
   themenSpaltePositiv: "positiv",
 
   verarbeitungLaeuft:
-    "Zahlung ist da. Jetzt wird jede einzelne Bewertung gelesen und einsortiert — das dauert 1 bis 5 Minuten. Die Seite aktualisiert sich von selbst.",
+    "Zahlung ist da. Jetzt wird jede einzelne Bewertung gelesen und einsortiert. Du kannst diese Seite ruhig schließen — es läuft ohne dich weiter, und du bekommst eine Mail, sobald der Report fertig ist.",
+  verarbeitungFortschritt: "{erledigt} von {gesamt} Bewertungen gelesen",
 
   pdfButton: "PDF ⬇",
 
@@ -253,6 +255,86 @@ export const report = {
   trendSteigend: "↑ steigend",
   trendFallend: "↓ fallend",
   trendStabil: "→ stabil",
+};
+
+// ---------------------------------------------------------------------------
+//  KONTO & ANMELDUNG
+// ---------------------------------------------------------------------------
+export const konto = {
+  // Anmeldeseite
+  loginTitel: "Anmelden",
+  loginText:
+    "Gib die E-Mail-Adresse ein, mit der du bezahlt hast. Du bekommst einen Link zugeschickt — damit bist du drin. Kein Passwort nötig.",
+  loginLabel: "E-Mail",
+  loginPlatzhalter: "du@marke.de",
+  loginButton: "Link schicken",
+  loginButtonLaeuft: "Wird geschickt…",
+  loginGesendet:
+    "Wenn es zu dieser Adresse ein Konto gibt, ist der Link unterwegs. Er gilt 30 Minuten.",
+  loginFehler: "Das hat nicht geklappt. Bitte versuch es nochmal.",
+  loginLinkUngueltig:
+    "Dieser Link ist abgelaufen oder wurde schon benutzt. Fordere einfach einen neuen an.",
+
+  // Kontobereich
+  titel: "Deine Reports",
+  begruessung: "Angemeldet als {email}",
+  abmelden: "Abmelden",
+  leer:
+    "Hier ist noch nichts. Sobald du einen Report freischaltest, taucht er an dieser Stelle auf.",
+  neuerReport: "Neuen Report erstellen",
+  spalteMarke: "Marke",
+  spalteDatum: "Erstellt",
+  spalteStatus: "Status",
+  statusFertig: "fertig",
+  statusLaeuft: "wird gerechnet",
+  statusOffen: "nicht bezahlt",
+  oeffnen: "Öffnen",
+  zitateGeloescht:
+    "Zitate entfernt — die Zahlen bleiben zum Vergleich erhalten.",
+};
+
+// ---------------------------------------------------------------------------
+//  E-MAILS
+// ---------------------------------------------------------------------------
+export const mails = {
+  anmeldenBetreff: "Dein Zugang zu Angle Miner",
+  anmeldenText: `Hier ist dein Anmeldelink:
+
+{link}
+
+Der Link gilt 30 Minuten und funktioniert einmal. Wenn du dich nicht angemeldet hast, kannst du diese Mail ignorieren.
+
+— Angle Miner`,
+
+  fertigBetreff: "Dein Report für {marke} ist fertig",
+  fertigText: `Die Tiefenanalyse ist durch. Jede einzelne Bewertung wurde gelesen und einsortiert.
+
+Hier ist dein Report:
+{link}
+
+Der Link führt direkt in dein Konto. Tipp: Sichere dir das PDF, dann hast du den Report unabhängig von uns.
+
+— Angle Miner`,
+
+  erstattungBetreff: "Wir haben dir das Geld zurückerstattet — {marke}",
+  erstattungText: `Bei deinem Report ist die KI-Tiefenanalyse zum großen Teil ausgefallen. Du hast trotzdem einen vollständigen Report bekommen, aber eben nicht den, für den du bezahlt hast.
+
+Deshalb haben wir dir die 49 € ohne Nachfrage zurückerstattet. Das Geld ist in ein paar Werktagen zurück auf deinem Konto.
+
+Dein Report bleibt dir erhalten:
+{link}
+
+Wenn du magst, versuch es später nochmal — dann meistens mit dem vollen Ergebnis.
+
+— Angle Miner`,
+
+  ablaufBetreff: "Deine Reports werden in {tage} Tagen aufgeräumt",
+  ablaufText: `Du warst länger nicht mehr angemeldet. In {tage} Tagen entfernen wir deshalb die Zitate und Bewertungstexte aus deinen Reports — die Zahlen und Auswertungen bleiben erhalten, du kannst also weiter vergleichen.
+
+Wenn du sie behalten willst, melde dich einfach einmal an:
+{link}
+
+— Angle Miner`,
 };
 
 // ---------------------------------------------------------------------------

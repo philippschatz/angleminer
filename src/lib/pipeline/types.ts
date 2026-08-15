@@ -129,6 +129,18 @@ export type ReportData = {
 
 export type ReportStatus = "preview" | "processing" | "ready";
 
+/** Fortschritt der gechunkten Tiefenanalyse. Überlebt einen Funktions-Timeout. */
+export type Fortschritt = {
+  erledigt: number;
+  gesamt: number;
+  /** Tags der bereits verarbeiteten Reviews, nach Review-ID. */
+  tags: Record<string, ReviewTags>;
+  /** Wie viele davon wirklich von der KI kamen (Rest: Regelwerk-Rückfall). */
+  vonKi: number;
+  /** Zeitstempel des letzten Fortschritts — erkennt haengengebliebene Jobs. */
+  zuletzt: string;
+};
+
 export type StoredReport = {
   id: string;
   status: ReportStatus;
@@ -138,4 +150,23 @@ export type StoredReport = {
   // Roh-Reviews behalten wir bis zum LLM-Upgrade, danach löschen (Datensparsamkeit)
   rawReviews?: RawReview[];
   createdAt: string;
+
+  /** Konto, dem der Report gehört. Entsteht mit der Zahlung. */
+  ownerEmail?: string;
+  /** Für Erstattungen gebraucht. */
+  stripeSessionId?: string;
+  /** Automatisch erstattet, weil die Tiefenanalyse groesstenteils ausfiel. */
+  refunded?: boolean;
+  /** Anteil der Reviews, die wirklich die KI gesehen hat (0..1). */
+  kiAnteil?: number;
+  fortschritt?: Fortschritt;
+  /** Gesetzt, sobald Zitate und Texte nach Ablauf entfernt wurden. Die Zahlen bleiben. */
+  zitateGeloeschtAm?: string;
+};
+
+export type Konto = {
+  email: string;
+  createdAt: string;
+  /** Letzter Login — Grundlage für die 24-Monats-Frist. */
+  lastSeenAt: string;
 };

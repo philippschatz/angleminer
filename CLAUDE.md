@@ -24,9 +24,19 @@ VoC-Micro-SaaS: Kunde lädt Review-CSV hoch → kostenlose Heuristik-Vorschau �
 ## User Journey (Stand 15.08.2026)
 
 1. `/new` — Datei oder Text rein. Einlesen, Putzen, PII-Scrub und Gratis-Vorschau laufen **vollständig im Browser**. Kein Serverkontakt, keine Report-ID, kein Upload.
-2. Klick auf „Freischalten" — **jetzt erst** gehen die bereinigten Bewertungen an `/api/report`. Bewusst vor der Weiterleitung zu Stripe, damit Gerätewechsel oder Abbruch die Analyse nicht vernichten. Daten abgebrochener Käufe werden nach 24 h weggeräumt (noch zu bauen).
-3. Stripe → Webhook schaltet frei → Tiefenanalyse serverseitig (noch zu bauen: Anstoß per Webhook + Cron, gechunkt) → Zustellung per Mail.
-4. Report lebt im Kundenkonto, das mit dem Kauf entsteht (noch zu bauen).
+2. Klick auf „Freischalten" — **jetzt erst** gehen die bereinigten Bewertungen an `/api/report`. Bewusst vor der Weiterleitung zu Stripe, damit Gerätewechsel oder Abbruch die Analyse nicht vernichten.
+3. Stripe → `/api/stripe-webhook` schaltet frei, legt das Konto an (Adresse aus dem Formular, sonst die von Stripe) und antwortet sofort — er rechnet bewusst nicht selbst.
+4. `/api/cron/verarbeiten` (jede Minute) arbeitet die Tiefenanalyse in Portionen ab und sichert den Fortschritt nach jeder Runde. Ein Funktions-Timeout kostet nur die angefangene Portion. `/api/process` ist derselbe Schritt als Sofortstart, solange der Käufer noch auf der Seite ist — **Anzeige, keine Voraussetzung**.
+5. Fertig → Mail mit Link. Unter `ERSTATTUNGS_SCHWELLE` (90 % per KI getaggt) wird **automatisch über Stripe erstattet**, der Kunde behält den Report und bekommt die Erstattungsmail statt der Fertig-Mail.
+6. `/konto` — Anmeldung per Einmal-Link, kein Passwort. Report-URLs bleiben zusätzlich direkt aufrufbar (nanoid(12), nicht erratbar), damit der Mail-Link ohne Umweg funktioniert.
+7. `/api/cron/aufraeumen` (täglich 4 Uhr): abgebrochene Käufe nach 24 h löschen · nach 24 Monaten ohne Anmeldung Zitate und Texte entfernen, **Vergleichszahlen bleiben** (Grundlage für den Refresh-Report).
+
+## Weitere unverhandelbare Regeln (seit 15.08.2026)
+
+7. **Der Server sieht keine Namen.** Hochgeladen werden nur `id`, `text`, `rating`, `date` — Vornamen fliegen schon in der Browser-Vorschau raus, damit der bezahlte Report exakt so aussieht wie das Gezeigte.
+8. **Der Kauf-Tab ist nie Voraussetzung.** Alles, was nach der Zahlung passiert, muss auch dann durchlaufen, wenn der Käufer den Tab sofort schließt.
+9. **Modellaufrufe nur über `callModel()`** in `tagger-llm.ts` — damit ein Wechsel nach Bedrock EU eine Funktion betrifft und nicht die halbe Pipeline.
+10. **Das Anthropic-SDK darf nicht ins Browser-Bundle.** Deshalb die Trennung `tagger.ts` / `tagger-llm.ts`. Bei Änderungen prüfen: `grep -rl anthropic .next/static/chunks/` muss leer bleiben.
 
 ## Unverhandelbare Regeln
 

@@ -8,5 +8,10 @@ export async function GET(req: NextRequest) {
   if (!id) return NextResponse.json({ error: "id fehlt" }, { status: 400 });
   const report = await getReport(id);
   if (!report) return NextResponse.json({ error: "nicht gefunden" }, { status: 404 });
-  return NextResponse.json({ status: report.status, paid: report.paid });
+  return NextResponse.json({
+    status: report.status,
+    paid: report.paid,
+    erledigt: report.fortschritt?.erledigt ?? 0,
+    gesamt: report.fortschritt?.gesamt ?? 0,
+  });
 }

@@ -80,10 +80,11 @@ export async function POST(req: NextRequest) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || req.nextUrl.origin;
 
-    // Ohne Stripe-Key (Dev): direkt freischalten, damit der Flow testbar bleibt.
+    // Ohne Stripe-Key (Dev): direkt freischalten — inklusive Kontoanlage, damit
+    // der lokale Ablauf demselben Weg folgt wie der echte über den Webhook.
     if (!process.env.STRIPE_SECRET_KEY) {
-      const gespeichert = await import("@/lib/store");
-      await gespeichert.markPaid(id);
+      const { markPaid } = await import("@/lib/store");
+      await markPaid(id, { email: body.email });
       return NextResponse.json({ id, url: `${baseUrl}/r/${id}?dev_paid=1` });
     }
 

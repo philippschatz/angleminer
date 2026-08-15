@@ -3,6 +3,13 @@ import { markPaid } from "@/lib/store";
 
 export const runtime = "nodejs";
 
+// Schaltet den Report frei und legt das Kundenkonto an.
+//
+// Der Webhook rechnet selbst nichts — er antwortet schnell und überlässt die
+// Tiefenanalyse dem Zeitplan (/api/cron/verarbeiten). Stripe bricht Webhooks
+// ab, die zu lange brauchen; eine Analyse von 5.000 Bewertungen gehört hier
+// nicht hinein.
+
 export async function POST(req: NextRequest) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const key = process.env.STRIPE_SECRET_KEY;
@@ -23,10 +30,18 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as { metadata?: { reportId?: string }; payment_status?: string };
+    const session = event.data.object as {
+      id: string;
+      metadata?: { reportId?: string };
+      payment_status?: string;
+      customer_email?: string | null;
+      customer_details?: { email?: string | null } | null;
+    };
     const reportId = session.metadata?.reportId;
     if (reportId && session.payment_status === "paid") {
-      await markPaid(reportId);
+      // Adresse aus dem Formular gewinnt; sonst die, die Stripe ohnehin erhebt.
+      const email = session.customer_details?.email || session.customer_email || undefined;
+      await markPaid(reportId, { email: email ?? undefined, stripeSessionId: session.id });
     }
   }
 

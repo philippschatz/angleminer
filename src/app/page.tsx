@@ -13,6 +13,7 @@ export default function Home() {
         </span>
         <div className="flex items-center gap-5 text-sm font-bold">
           <Link href="/r/demo" className="hover:underline">{start.navBeispiel}</Link>
+          <Link href="/konto" className="hover:underline">{start.navAnmelden}</Link>
           <Link href="/new" className="pop-press rounded-full border-2 border-ink bg-pop-blue px-4 py-2 text-white shadow-pop-sm">
             {start.navCta}
           </Link>
