@@ -54,12 +54,15 @@ export const start = {
   // Die Headline ist in vier Teile zerlegt, weil zwei davon farbig
   // hinterlegt sind. Reihenfolge im Satz: teil1 → markiert1 → teil2 → markiert2
   h1Teil1: "Hol dir authentische",
-  h1Markiert1: "Ad-Angles",
-  h1Teil2: "in der Stimme",
-  h1Markiert2: "deiner Kunden.",
+  h1Markiert1: "Ad-Angles,",
+  h1Teil2: "die",
+  h1Markiert2: "verkaufen.",
 
+  // Die Subline trägt den Beweis für das Versprechen der Headline: woher die
+  // Angles kommen und warum sie belegt sind. Ohne sie wäre "die verkaufen"
+  // eine reine Behauptung.
   subline:
-    "2.000 Kundenbewertungen rein, 10 belegte Ad-Angles raus — mit Zitaten, Zahlen und Hooks. Das Dokument, das du Agentur oder Creator in die Hand drückst.",
+    "Nicht geraten, sondern aus deinen eigenen Kundenbewertungen gezogen — First-Party-Daten in der Stimme deiner Kundinnen, an die kein Wettbewerber herankommt. Mit wörtlichen Zitaten, Zahlen zum Nachzählen und fertigen Hooks. Das Dokument, das du Agentur oder Creator in die Hand drückst.",
 
   ctaPrimaer: "Bewertungen hochladen — Vorschau gratis",
   ctaSekundaer: "Erst das Beispiel ansehen",
