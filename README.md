@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Angle Miner — V1
 
-## Getting Started
+**„2.000 Kundenbewertungen rein, 10 belegte Ad-Angles raus."**
+Reviews-CSV hochladen → kostenlose Vorschau → 49 € via Stripe → voller Report (Angle-Map, Objection-Bank, Scrollstopper, Kundenwording) als Web-Report + PDF.
 
-First, run the development server:
+## Architektur in 30 Sekunden
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Upload (CSV/Paste)
+  → parse.ts    Spalten-Heuristik (Judge.me, Yotpo, Loox, Trustpilot, Trusted Shops, Amazon)
+  → clean.ts    Dedupe · Junk-Filter · PII-Scrub · Seeding-Gegenprobe (≥20× identisch ⇒ Warnung im Report)
+  → tagger.ts   Heuristik sofort (Vorschau, kostenlos) · LLM-Tagging nach Zahlung (Claude, 40er-Batches)
+  → aggregate.ts  ALLE Zahlen deterministisch in Code — das LLM zählt nie
+  → enhance.ts  Ein LLM-Call: Angle-Titel in Kundensprache + Hooks (Zahlen bleiben unangetastet)
+  → Report      /r/[id] · Vorschau (Angle 1 + Locked Sections) vs. voll (nach Zahlung)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Zahlungsflow: `/api/checkout` (Stripe Checkout, Report-ID in Metadata) → Webhook `/api/stripe-webhook` schaltet frei → `/api/process` upgraded den Report von Heuristik auf LLM (Client pollt `/api/status`). Fallback: Success-URL verifiziert die Session direkt, falls der Webhook lahmt. Rohdaten werden nach der Verarbeitung gelöscht.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Lokal starten
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+node scripts/make-demo-data.mjs   # synthetische Demo-Reviews erzeugen
+npx tsx scripts/seed-demo.ts      # Beispiel-Report unter /r/demo seeden
+npm run dev                       # http://localhost:3000
+```
 
-## Learn More
+Ohne Keys läuft alles im Dev-Modus: Heuristik-Analyse, simulierter Kauf. Der komplette Flow (Upload → Vorschau → „Kauf" → voller Report) ist so testbar.
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment (Vercel, ~30 Minuten)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Repo pushen**, in Vercel importieren.
+2. **Postgres**: Supabase- oder Neon-Projekt anlegen, `DATABASE_URL` als Env-Var setzen (Tabelle wird beim ersten Zugriff automatisch angelegt).
+3. **Anthropic**: API-Key erzeugen, `ANTHROPIC_API_KEY` setzen. Kosten: grob 2–5 € pro 2.000-Review-Report (Haiku fürs Tagging, ein Sonnet-Call fürs Finishing).
+4. **Stripe**: Produkt brauchst du nicht anzulegen (Preis wird per `price_data` erzeugt). `STRIPE_SECRET_KEY` setzen. Webhook-Endpoint `https://DEINE-DOMAIN/api/stripe-webhook` mit Event `checkout.session.completed` anlegen, `STRIPE_WEBHOOK_SECRET` setzen. Stripe Tax aktivieren und `STRIPE_AUTOMATIC_TAX=1` (B2B/B2C-USt!).
+5. `NEXT_PUBLIC_BASE_URL` auf die Domain setzen.
+6. **Demo-Report in Prod seeden**: lokal `DATABASE_URL=<prod-url> npx tsx scripts/seed-demo.ts` — oder mit einem echten (anonymisierten) Datensatz statt der Synthetik.
+7. Vercel-Funktion `/api/process` braucht `maxDuration: 300` (gesetzt) — auf dem Hobby-Plan sind nur 60 s erlaubt, also Pro-Plan oder Review-Cap senken.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Preis / Produktlogik
 
-## Deploy on Vercel
+- 49 € pro Report (bis 5.000 Reviews), Einmalzahlung, keine Trials — Vorschau ist das Verkaufsargument.
+- Vorschau kostet dich nichts (Heuristik, kein LLM-Call) → kein Abuse-Risiko beim Gratis-Schritt.
+- Mindestens 30 Reviews, sonst lehnt die App ehrlich ab.
+- Compliance-Flags (Klima-/Herkunfts-/Siegel-Claims in Zitaten) werden markiert: „nicht 1:1 in Ads übernehmen".
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Bewusst NICHT in V1
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Accounts/Login · Credits/Packs · TikTok/Shop-APIs · Abo · Team-Features · EN-Version.
+Alles davon erst bauen, wenn zahlende Kunden es verlangen.
+
+## Nächste sinnvolle Schritte
+
+1. Namen/Domain festmachen (aktuell Working Title „Angle Miner").
+2. Demo-Report mit echten (anonymisierten) Daten ersetzen — die Synthetik ist als Demo gekennzeichnet.
+3. Impressum/Datenschutz/AGB ergänzen (Pflicht vor Launch, DE).
+4. Refresh-Report (19 €) und Agentur-Pack als Stripe-Varianten.
+5. E-Mail-Versand des Report-Links (aktuell nur URL).

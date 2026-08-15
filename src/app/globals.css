@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Design C — „DTC Pop": Neo-Brutalismus, Cream/Black + Blau/Pink/Gelb/Mint */
+@theme {
+  --color-cream: #fdf6e9;
+  --color-cream-2: #f6eeda;
+  --color-ink: #12100c;
+  --color-pop-blue: #2b45ff;
+  --color-pop-pink: #ff5d8f;
+  --color-pop-yellow: #ffd23f;
+  --color-pop-mint: #3ecf8e;
+  --shadow-pop: 5px 5px 0 #12100c;
+  --shadow-pop-sm: 3px 3px 0 #12100c;
+  --shadow-pop-lg: 8px 8px 0 #12100c;
+  --font-heavy: var(--font-archivo-black), "Arial Black", sans-serif;
+  --font-sans: var(--font-archivo), -apple-system, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+.font-heavy { font-family: var(--font-heavy); }
+
+/* Interaktives „Drücken" für Pop-Buttons */
+.pop-press { transition: transform 0.08s, box-shadow 0.08s; }
+.pop-press:hover, .pop-press:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #12100c !important; }
+
+@media print {
+  body { background: #fff !important; }
+  main { max-width: 100% !important; padding: 0 !important; }
+  article, section { break-inside: avoid; }
+  .print\:hidden { display: none !important; }
+  /* Print: Schatten & Rotationen raus, Ränder dünner */
+  * { box-shadow: none !important; transform: none !important; }
 }
