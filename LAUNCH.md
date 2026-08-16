@@ -5,10 +5,14 @@ Abhaken, was erledigt ist.
 
 ## Woche 1 — Dinge, die auf jemand anderen warten
 
-- [ ] **Name festlegen und Domain kaufen** (~15 €/Jahr). Blockiert Stripe, Resend und die Rechtstexte.
-- [ ] **Stripe-Konto anlegen und verifizieren.** Firmendaten, Ausweis, Bankverbindung. Die Prüfung dauert oft 1–2 Werktage — deshalb früh anstoßen.
-- [ ] **Stripe Tax aktivieren** (Umsatzsteuer, bei DE/EU-Kunden Pflicht).
-- [ ] **Rechtstexte beauftragen oder erstellen:** Impressum, Datenschutzerklärung, AGB. Dazu ein **Auftragsverarbeitungsvertrag (AVV)** — den werden deine Kunden verlangen, weil du Bewertungen ihrer Endkunden verarbeitest. Kein Generator-Text: Der AVV muss die Unterauftragsverarbeiter nennen (Vercel, Anthropic, Neon/Supabase, Stripe, Resend) und den US-Bezug von Anthropic ausweisen.
+> **Betreiber:** Philipp Schatz als Privatperson, Wohn- und Steuersitz **Portugal**.
+> Nicht die deutsche UG. Das bestimmt Stripe-Land, Steuerregistrierung und Impressum.
+
+- [ ] **Name festlegen und Domain kaufen** (~15 €/Jahr). Blockiert Stripe, Resend und die Rechtstexte. Empfehlung: INWX, `.de` und `.com` zusammen. Bei `.de` aus Portugal klären, ob ein Zustellungsbevollmächtigter in Deutschland verlangt wird.
+- [ ] **Steuerberater fragen**, bevor Stripe startet: Braucht es in Portugal eine *abertura de atividade*? Wie wird bei überwiegend deutschen Käufern abgerechnet (OSS ab 10.000 € Auslandsumsatz an Verbraucher, Reverse Charge bei Kunden mit USt-ID)?
+- [ ] **Stripe-Konto anlegen und verifizieren** — Land Portugal, Kontotyp Einzelperson. NIF, Ausweis, Wohnadresse, IBAN. Die Prüfung dauert oft 1–2 Werktage.
+- [ ] **Stripe Tax aktivieren**, Registrierung Portugal. USt-ID-Abfrage im Checkout einschalten.
+- [ ] **Rechtstexte beauftragen** — bei einer Kanzlei, die grenzüberschreitend berät: Betreiber in Portugal, Zielmarkt Deutschland. Impressum, Datenschutzerklärung, AGB und ein **Auftragsverarbeitungsvertrag (AVV)**, den deine Kunden verlangen werden. Kein Generator-Text: Der AVV muss die Unterauftragsverarbeiter nennen (Vercel, Anthropic, Neon/Supabase, Stripe, Resend) und den US-Bezug von Anthropic ausweisen. Briefing liegt fertig in `docs/RECHT-BRIEFING.md`.
 
 ## Woche 1 — Konten, die du selbst in Minuten anlegst
 

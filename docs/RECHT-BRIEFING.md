@@ -26,6 +26,18 @@ Weitergabe von Daten an Dritte zu eigenen Zwecken.
 
 ---
 
+## 1a. Wer betreibt das
+
+Betreiber ist **Philipp Schatz als Privatperson mit Wohn- und Steuersitz in Portugal**.
+Keine Gesellschaft, keine deutsche Betriebsstätte. Die ebenfalls existierende deutsche
+UG ist an diesem Produkt **nicht** beteiligt.
+
+Die Zielgruppe sitzt dagegen überwiegend in Deutschland, die Website ist auf Deutsch
+und richtet sich erkennbar an den deutschen Markt.
+
+Daraus ergeben sich Fragen, die bitte mit geprüft werden — siehe Abschnitt 6,
+Fragen 8 bis 10.
+
 ## 2. Die zentrale Frage: Rollenverteilung
 
 Es fallen **zwei** getrennte Arten personenbezogener Daten an.
@@ -164,3 +176,17 @@ oder reicht eine Löschung auf Anfrage?
 rechtlich heikle Aussagen enthalten (Klima, Herkunft, Siegel, Gesundheit), mit
 einer Warnung. Reicht dieser Hinweis zur Enthaftung, oder braucht es eine
 weitergehende Regelung in den AGB?
+
+**Frage 8 — Welches Recht, welche Anbieterkennzeichnung.** Der Betreiber sitzt in
+Portugal, die Website richtet sich an den deutschen Markt. Genügt eine
+Anbieterkennzeichnung nach portugiesischem Recht, oder ist ein Impressum nach
+deutschem Muster nötig? Und welche Angaben müssen darin stehen?
+
+**Frage 9 — Wohnadresse im Impressum.** Ohne Gesellschaft gibt es keine
+Geschäftsadresse. Muss die private Wohnanschrift in Portugal öffentlich auf der
+Website stehen, oder ist eine zustellungsfähige Alternative zulässig?
+
+**Frage 10 — Haftung.** Als Privatperson haftet der Betreiber unbeschränkt, auch
+für Datenschutzverstöße im Zusammenhang mit den Endkundendaten seiner Kunden.
+Ist die Rechtsform für dieses Geschäftsmodell tragbar, oder sollte vor nennenswertem
+Umsatz eine haftungsbeschränkte Struktur dazwischen?

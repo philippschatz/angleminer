@@ -3,18 +3,28 @@
 Alles, was du bei Stripe klicken musst, mit den genauen Werten. Reihenfolge einhalten:
 Die Verifizierung dauert 1–2 Werktage, alles andere sind Minuten.
 
+> **Ausgangslage:** Verkäufer ist Philipp Schatz als **Privatperson mit Sitz in Portugal**,
+> nicht die deutsche UG. Das bestimmt Land, Steuerregistrierung und Impressum.
+> Steuerliche Punkte hier sind Hinweise, keine Beratung — vor der Verifizierung
+> mit dem Steuerberater abgleichen.
+
 ## 1. Konto anlegen
 
-`dashboard.stripe.com/register` — mit Geschäfts-Mailadresse, nicht privat.
+`dashboard.stripe.com/register` — Land: **Portugal**.
 
 **Halte bereit:**
-- Rechtsform und Firmenname (bei dir vermutlich die Philipp Schatz UG)
-- Handelsregisternummer und Umsatzsteuer-ID
-- Geschäftsadresse
-- Personalausweis oder Reisepass der geschäftsführenden Person
-- IBAN des Geschäftskontos
-- Kurzbeschreibung, was verkauft wird — für uns:
+- Kontotyp: Einzelperson / Selbstständiger (nicht Unternehmen)
+- Portugiesische Steuernummer (NIF)
+- Wohnadresse in Portugal
+- Personalausweis oder Reisepass
+- IBAN — das Konto sollte auf denselben Namen laufen wie das Stripe-Konto
+- Kurzbeschreibung, was verkauft wird:
   *„Digitale Analyse-Reports aus Kundenbewertungen. Einmalzahlung, kein Abo, sofortige digitale Lieferung."*
+
+**Vorher klären:** Ob in Portugal für diese Tätigkeit eine Gewerbeanmeldung
+(*abertura de atividade* bei den Finanças) nötig ist. Regelmäßiger Verkauf ist
+eine wirtschaftliche Tätigkeit — Stripe fragt danach, und ohne saubere
+Registrierung wird die Verifizierung unangenehm.
 
 **Wichtig für die Prüfung:** Stripe schaut sich die Website an. Wenn die Domain noch leer ist,
 kann die Freigabe hängen. Deshalb erst Domain kaufen, Seite live schalten, dann verifizieren.
@@ -23,10 +33,21 @@ kann die Freigabe hängen. Deshalb erst Domain kaufen, Seite live schalten, dann
 
 Dashboard → **Steuern** → Stripe Tax aktivieren.
 
-- Registrierung für **Deutschland** eintragen (deine USt-ID)
-- Voreinstellung Produktkategorie: **digitale Dienstleistung**
-- Preisangabe: **inklusive Steuer** — bei Verkauf an Endkunden in DE muss der
-  Bruttopreis stehen. 49 € sind der Endpreis.
+- Registrierung für **Portugal** eintragen — nicht Deutschland
+- Voreinstellung Produktkategorie: **digitale Dienstleistung** (elektronisch erbrachte Leistung)
+- Preisangabe: **inklusive Steuer**. 49 € sind der Endpreis, den der Kunde sieht.
+
+**Der Punkt, der dich wirklich betrifft:** Deine Käufer sitzen überwiegend in
+Deutschland. Bei elektronisch erbrachten Leistungen an **Verbraucher** in anderen
+EU-Ländern gilt eine EU-weite Bagatellgrenze von 10.000 € Jahresumsatz. Darunter
+darfst du portugiesische Umsatzsteuer berechnen, darüber musst du die des
+Ziellands abführen — über das OSS-Verfahren. Stripe Tax kann das, es muss aber
+richtig eingestellt sein.
+
+Verkäufe an **Unternehmen mit gültiger USt-ID** laufen dagegen im
+Reverse-Charge-Verfahren, da berechnest du gar keine Steuer. Bei deiner
+Zielgruppe — Marken mit eigenem Shop — dürfte das der Normalfall sein. Stripe
+Checkout kann die USt-ID abfragen und prüfen; das solltest du aktivieren.
 
 Danach in Vercel setzen: `STRIPE_AUTOMATIC_TAX=1`
 
