@@ -3,7 +3,9 @@ import { getReport } from "@/lib/store";
 import { verarbeitungsSchritt } from "@/lib/verarbeitung";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
+// 60 s ist das Maximum des Hobby-Tarifs. Auf Pro sind 300 möglich — dann hier
+// und in /api/cron/verarbeiten hochsetzen, das beschleunigt grosse Reports.
+export const maxDuration = 60;
 
 // Sofortstart, wenn der Käufer nach der Zahlung noch auf der Seite ist —
 // dann muss er nicht auf den nächsten Zeitplan-Lauf warten.
@@ -12,7 +14,7 @@ export const maxDuration = 300;
 // nach. Deshalb wird hier auch nichts mehr in einen Hängezustand geschrieben,
 // aus dem nichts mehr herauskommt.
 
-const BUDGET_MS = 280_000;
+const BUDGET_MS = 55_000;
 
 export async function POST(req: NextRequest) {
   const { id } = (await req.json()) as { id?: string };

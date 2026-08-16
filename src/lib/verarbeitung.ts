@@ -17,8 +17,12 @@ import { basisUrl, erstattungsMail, reportFertigMail } from "./mail";
 /** Unter diesem Anteil KI-getaggter Bewertungen gilt der Report als nicht geliefert. */
 export const ERSTATTUNGS_SCHWELLE = 0.9;
 
-/** Zeitpuffer bis zum Funktions-Timeout, damit Speichern noch sicher klappt. */
-const PUFFER_MS = 45_000;
+/**
+ * Zeitpuffer bis zum Funktions-Timeout, damit Speichern noch sicher klappt.
+ * Klein gehalten, weil auf dem Hobby-Tarif nur 60 s zur Verfügung stehen —
+ * bei einem grossen Puffer bliebe kaum Zeit für eine einzige Runde.
+ */
+const PUFFER_MS = 10_000;
 
 export type SchrittErgebnis = {
   status: StoredReport["status"];

@@ -22,6 +22,19 @@ Abhaken, was erledigt ist.
 - [ ] **Anthropic-Konto**, Guthaben aufladen, API-Schlüssel erzeugen. Rechne mit 2–5 € pro verkauftem Report.
 - [ ] **Resend-Konto** (bis 3.000 Mails/Monat kostenlos). Dort deine Domain eintragen und die angezeigten DNS-Einträge beim Domain-Anbieter hinterlegen — sonst landen deine Mails im Spam.
 
+## Beim Wechsel auf Vercel Pro nachziehen
+
+Der aktuelle Stand ist auf den **Hobby-Tarif** gedrosselt. Das reicht zum Testen,
+aber nicht zum Verkaufen: Die Tiefenanalyse läuft dann nur einmal täglich an,
+ein Käufer würde tagelang auf seinen Report warten.
+
+Sobald Pro gebucht ist, drei Stellen zurückdrehen:
+
+- [ ] `vercel.json` — beide Zeitpläne auf `* * * * *` (jede Minute) statt nachts
+- [ ] `src/app/api/process/route.ts` — `maxDuration` auf `300`, `BUDGET_MS` auf `280_000`
+- [ ] `src/app/api/cron/verarbeiten/route.ts` — dieselben zwei Werte
+- [ ] Optional `src/lib/verarbeitung.ts` — `PUFFER_MS` zurück auf `45_000`
+
 ## Woche 2 — Zusammenstecken
 
 - [ ] **Zwei Geheimnisse erzeugen.** Im Terminal je einmal:

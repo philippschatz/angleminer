@@ -4,7 +4,7 @@
   "crons": [
     {
       "path": "/api/cron/verarbeiten",
-      "schedule": "* * * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/aufraeumen",
