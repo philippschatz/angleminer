@@ -1,14 +1,21 @@
 import { Konto, StoredReport } from "./pipeline/types";
 
 // Storage-Adapter:
-// - Mit DATABASE_URL (Supabase/Neon/Vercel Postgres): Postgres.
+// - Mit DATABASE_URL oder POSTGRES_URL (Supabase/Neon/Vercel Postgres): Postgres.
 // - Ohne: Dateisystem unter .data/ (nur lokal/Dev).
 //
 // Drei Dinge liegen hier: Reports, Konten und Login-Token. Konten entstehen mit
 // der Zahlung, Token sind kurzlebige Einmal-Schlüssel für die Anmeldung ohne
 // Passwort.
 
-const usePg = !!process.env.DATABASE_URL;
+/**
+ * Verbindung zur Datenbank. Die Neon-Integration von Vercel legt POSTGRES_URL
+ * an, andere Anbieter DATABASE_URL — wir nehmen, was vorhanden ist. Sonst
+ * fiele die Anwendung bei einem abweichenden Namen still auf das Dateisystem
+ * zurück, und jeder Report wäre beim naechsten Neustart weg.
+ */
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+const usePg = !!dbUrl;
 
 // ---------- Postgres ----------
 import type { Pool as PgPool } from "pg";
@@ -18,7 +25,7 @@ let pgReady: Promise<void> | null = null;
 async function getPool(): Promise<PgPool> {
   if (!pool) {
     const { Pool } = await import("pg");
-    pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3 });
+    pool = new Pool({ connectionString: dbUrl, max: 3 });
     pgReady = pool
       .query(`
         CREATE TABLE IF NOT EXISTS reports (
