@@ -43,3 +43,6 @@ next-env.d.ts
 .data/
 .env
 demo/*.csv
+
+# Enthaelt Geheimnisse zum Kopieren nach Vercel - nie einchecken
+VERCEL-VARIABLEN.txt
