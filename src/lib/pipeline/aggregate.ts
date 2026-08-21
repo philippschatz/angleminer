@@ -1,5 +1,6 @@
 import {
-  Angle, CleanStats, Objection, Quote, ReportData, Sentiment, TaggedReview, THEME_LABELS, THEMES, Theme, WordEntry,
+  Angle, CleanStats, Objection, Quelle, Quellenluecke, Quote, ReportData, Sentiment,
+  TaggedReview, THEME_LABELS, THEMES, Theme, WordEntry,
 } from "./types";
 
 // Alles hier ist deterministisch. Kein LLM zählt, rankt oder erfindet Zahlen.
@@ -80,6 +81,7 @@ function toQuote(r: TaggedReview): Quote {
     date: r.date,
     rating: r.rating,
     source: r.source,
+    quelle: r.quelle ?? "bewertung",
     complianceFlags: r.complianceFlags,
   };
 }
@@ -127,6 +129,77 @@ function templateHooks(theme: Theme, topQuote?: Quote): string[] {
   const hooks = [...base[theme]];
   if (q) hooks.push(q);
   return hooks.slice(0, 3);
+}
+
+const quelleVon = (r: TaggedReview): Quelle => r.quelle ?? "bewertung";
+
+/**
+ * Vergleicht dasselbe Thema zwischen den Quellen.
+ *
+ * Der Sinn mehrerer Quellen liegt nicht darin, mehr Text zu haben, sondern in
+ * dem Abstand zwischen ihnen: Bewertungen loben die Passform, waehrend im
+ * Support jeden Tag jemand nach Groessen fragt. Diese Luecke ist in keiner der
+ * beiden Quellen allein zu sehen - und sie ist der eigentliche Hinweis darauf,
+ * wo eine Anzeige ansetzen muss.
+ *
+ * Alles deterministisch gerechnet, wie jede andere Zahl im Report.
+ */
+const MIN_JE_QUELLE = 10;    // darunter ist eine Quelle kein Vergleichsmassstab
+const MIN_JE_THEMA = 3;      // darunter ist ein Themenwert je Quelle Rauschen
+const MIN_MEHR_PUNKTE = 6;   // Prozentpunkte mehr Raum als in den Bewertungen
+const MIN_FAKTOR = 1.6;      // und mindestens so viel Mal so viel Raum
+
+function quellenluecken(tagged: TaggedReview[]): Quellenluecke[] {
+  const proQuelle = new Map<Quelle, TaggedReview[]>();
+  for (const r of tagged) {
+    const q = quelleVon(r);
+    proQuelle.set(q, [...(proQuelle.get(q) ?? []), r]);
+  }
+  const belastbar = [...proQuelle.entries()].filter(([, rs]) => rs.length >= MIN_JE_QUELLE);
+  if (belastbar.length < 2) return []; // ohne zweite Quelle gibt es nichts zu vergleichen
+
+  const luecken: Quellenluecke[] = [];
+  for (const theme of THEMES) {
+    if (theme === "sonstiges") continue;
+
+    const jeQuelle = belastbar
+      .map(([quelle, rs]) => {
+        const mit = rs.filter((r) => r.tags.themes.includes(theme));
+        const pos = mit.filter((r) => r.tags.sentiment === "positiv").length;
+        return {
+          quelle,
+          nennungen: mit.length,
+          anteilPct: Math.round((mit.length / rs.length) * 100),
+          positivPct: mit.length > 0 ? Math.round((pos / mit.length) * 100) : 0,
+        };
+      })
+      .filter((x) => x.nennungen >= MIN_JE_THEMA);
+    if (jeQuelle.length < 2) continue;
+
+    const bewertungenAnteil = jeQuelle.find((x) => x.quelle === "bewertung")?.anteilPct ?? 0;
+    const andere = jeQuelle.filter((x) => x.quelle !== "bewertung");
+    if (andere.length === 0) continue;
+
+    const spitze = andere.reduce((a, b) => (b.anteilPct > a.anteilPct ? b : a));
+    const mehr = spitze.anteilPct - bewertungenAnteil;
+    // Beide Huerden: absoluter Abstand UND Verhaeltnis. Sonst wird aus 1 % vs
+    // 3 % eine "Verdreifachung", die auf drei Texten beruht.
+    if (mehr < MIN_MEHR_PUNKTE) continue;
+    if (bewertungenAnteil > 0 && spitze.anteilPct < bewertungenAnteil * MIN_FAKTOR) continue;
+
+    const ausSpitze = (proQuelle.get(spitze.quelle) ?? [])
+      .filter((r) => r.tags.themes.includes(theme))
+      .sort((a, b) => zitatGuete(b) - zitatGuete(a));
+
+    luecken.push({
+      theme,
+      jeQuelle: jeQuelle.sort((a, b) => b.anteilPct - a.anteilPct),
+      mehrAlsBewertungen: mehr,
+      auffaelligste: spitze.quelle,
+      quotes: pickDiverse(ausSpitze, 3).map(toQuote),
+    });
+  }
+  return luecken.sort((a, b) => b.mehrAlsBewertungen - a.mehrAlsBewertungen).slice(0, 5);
 }
 
 export function buildReport(args: {
@@ -244,6 +317,14 @@ export function buildReport(args: {
     objections,
     scrollstoppers,
     wording: { kunden: wordLexicon(tagged) },
+    quellenSplit: [...new Set(tagged.map(quelleVon))]
+      .map((quelle) => {
+        const rs = tagged.filter((r) => quelleVon(r) === quelle);
+        const pos = rs.filter((r) => r.tags.sentiment === "positiv").length;
+        return { quelle, count: rs.length, positivPct: Math.round((pos / rs.length) * 100) };
+      })
+      .sort((a, b) => b.count - a.count),
+    quellenluecken: quellenluecken(tagged),
     taggedBy: tagged[0]?.taggedBy ?? "heuristik",
     llmEnhanced,
   };

@@ -1,6 +1,35 @@
 // Zentrale Typen + Taxonomie der Pipeline.
 // Regel: Das LLM taggt EINZELNE Reviews. Alles Zählen/Ranken passiert deterministisch in Code.
 
+/**
+ * Woher ein Text stammt. Der Unterschied ist inhaltlich entscheidend:
+ *
+ * - bewertung: oeffentlich geschrieben, oft auf eine incentivierte Mail hin,
+ *   in der Honeymoon-Phase. Die freundlichste und unehrlichste Quelle.
+ * - support: was Kunden schreiben, wenn etwas schiefgeht. Hier stehen die
+ *   echten Kaufbarrieren, unverstellt.
+ * - kommentar: unter Anzeigen und Beitraegen. Hier stehen die Fragen, die
+ *   Leute VOR dem Kauf stellen - die Einwaende, bevor sie Kunden werden.
+ * - mail: direkte Zuschriften ans Postfach, zwischen Support und Lob.
+ */
+export const QUELLEN = ["bewertung", "support", "kommentar", "mail"] as const;
+export type Quelle = (typeof QUELLEN)[number];
+
+export const QUELLE_LABELS: Record<Quelle, string> = {
+  bewertung: "Bewertungen",
+  support: "Support",
+  kommentar: "Kommentare",
+  mail: "Postfach",
+};
+
+/** Kurzform fuer die Herkunftsmarkierung an einzelnen Zitaten. */
+export const QUELLE_KURZ: Record<Quelle, string> = {
+  bewertung: "Bewertung",
+  support: "Support",
+  kommentar: "Kommentar",
+  mail: "Mail",
+};
+
 export type RawReview = {
   id: string;
   body: string;
@@ -9,7 +38,9 @@ export type RawReview = {
   date?: string; // ISO
   author?: string;
   product?: string;
-  source?: string; // judge.me, yotpo, ...
+  source?: string; // judge.me, yotpo, gorgias, ...
+  /** Art der Quelle. Fehlt sie, wird "bewertung" angenommen (Altdaten). */
+  quelle?: Quelle;
 };
 
 export const THEMES = [
@@ -84,6 +115,7 @@ export type Quote = {
   date?: string;
   rating?: number;
   source?: string;
+  quelle?: Quelle;
   complianceFlags: string[];
 };
 
@@ -108,6 +140,34 @@ export type Objection = {
 
 export type WordEntry = { word: string; count: number };
 
+/**
+ * Ein Thema, das in einer Quelle deutlich anders aussieht als in einer anderen.
+ *
+ * Das ist der Grund, mehrere Quellen anzubinden: Bewertungen loben die Passform,
+ * waehrend im Support jeden Tag jemand nach Groessen fragt. Diese Luecke sieht
+ * man in keiner der beiden Quellen allein.
+ */
+export type Quellenluecke = {
+  theme: Theme;
+  /** Je Quelle: Nennungen, Anteil an dieser Quelle, Positivanteil. */
+  jeQuelle: { quelle: Quelle; nennungen: number; anteilPct: number; positivPct: number }[];
+  /**
+   * Um wie viele Prozentpunkte das Thema in der auffaelligsten Quelle mehr Raum
+   * einnimmt als in den Bewertungen.
+   *
+   * Bewusst ein Vergleich von ANTEILEN, nicht von Stimmungswerten. Support und
+   * Kommentare sind naturgemaess kritisch - niemand schreibt den Support an, um
+   * zu loben. Ein Stimmungsvergleich zwischen einem Lob- und einem
+   * Beschwerdekanal ergibt immer einen Riesenabstand und sagt nichts. Wie viel
+   * Raum ein Thema einnimmt, ist dagegen vergleichbar.
+   */
+  mehrAlsBewertungen: number;
+  /** Quelle, in der das Thema am meisten Raum einnimmt. */
+  auffaelligste: Quelle;
+  /** Belege aus der auffaelligsten Quelle. */
+  quotes: Quote[];
+};
+
 export type ReportData = {
   id: string;
   createdAt: string;
@@ -123,6 +183,14 @@ export type ReportData = {
   objections: Objection[];
   scrollstoppers: Quote[];
   wording: { kunden: WordEntry[]; };
+  /**
+   * Wie viele Texte je Quelle eingegangen sind — und wie positiv diese Quelle
+   * insgesamt ist. Der Grundwert ist wichtig fuer die Einordnung: 8 % positiv
+   * im Support ist normal, nicht alarmierend.
+   */
+  quellenSplit?: { quelle: Quelle; count: number; positivPct: number }[];
+  /** Themen, die je Quelle deutlich anders aussehen. Nur bei mehreren Quellen. */
+  quellenluecken?: Quellenluecke[];
   taggedBy: "llm" | "heuristik";
   llmEnhanced: boolean;
 };

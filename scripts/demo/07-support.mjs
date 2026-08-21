@@ -1,0 +1,48 @@
+// Support-Anfragen. Der Ton ist voellig anders als in Bewertungen: keine
+// Hoeflichkeitsfloskeln, kein Lob, direkt zum Problem. Genau deshalb steht hier
+// die Kaufbarriere - und genau deshalb lohnt der Vergleich mit den Bewertungen.
+//
+// Inhaltlicher Kontrast, den der Report sichtbar machen soll:
+// Bewertungen loben die Passform. Im Support geht es fast nur um Groessen.
+export default [
+  { b: "Größe zu klein", t: "Hallo, ich habe M bestellt laut Ihrer Tabelle, das passt aber überhaupt nicht. Kann ich L tauschen?" },
+  { b: "Umtausch Größe", t: "Ich brauche eine Nummer größer. Wie geht der Umtausch?" },
+  { b: "Größentabelle", t: "Ihre Größentabelle stimmt nicht. Ich habe nach Unterbrustumfang bestellt und es ist viel zu eng." },
+  { b: "welche Größe", t: "Ich bin 80C. Welche Größe brauche ich bei Ihnen? Auf der Seite finde ich dazu nichts Eindeutiges." },
+  { b: "zu eng", t: "Das Bralette schneidet unter der Brust ein. Ich habe die Größe nach Ihrer Empfehlung genommen." },
+  { b: "Rückgabe", t: "Zwei Teile passen nicht, ich möchte beide zurückschicken. Wie läuft das?" },
+  { b: "Tausch S auf M", t: "Kann ich S gegen M tauschen ohne neu zu bezahlen?" },
+  { b: "Größe zwischen zwei", t: "Ich liege zwischen S und M. Was empfehlen Sie? Ich möchte nicht wieder zurückschicken müssen." },
+  { b: "passt nicht", t: "Leider passt es nicht. Retourenschein liegt nicht bei, wo bekomme ich den?" },
+  { b: "Beratung Größe", t: "Ich habe eine große Oberweite und schmalen Rücken. Bei welcher Größe habe ich eine Chance?" },
+  { b: "zu groß bestellt", t: "Ich habe auf Empfehlung eine Nummer größer genommen und jetzt ist es zu weit. Sehr verwirrend." },
+  { b: "Größe Slip anders", t: "Der Slip in M passt, das Bralette in M nicht. Warum ist das innerhalb einer Marke unterschiedlich?" },
+  { b: "Umtausch dauert", t: "Mein Umtausch ist seit zwei Wochen unterwegs. Wo bleibt das Ersatzteil?" },
+  { b: "Lieferung", t: "Bestellung vom 3. ist noch nicht da. Sendungsverfolgung zeigt seit vier Tagen keine Änderung." },
+  { b: "Paket verschollen", t: "DHL sagt zugestellt, bei mir ist nichts angekommen. Bitte prüfen." },
+  { b: "Lieferzeit", t: "Wie lange dauert der Versand nach Österreich? Steht nirgends auf der Seite." },
+  { b: "Rechnung fehlt", t: "In meiner Bestellung war keine Rechnung. Können Sie die per Mail schicken?" },
+  { b: "Waschen", t: "Kann ich das in den Trockner? Auf dem Etikett steht ein Symbol, das ich nicht kenne." },
+  { b: "Pilling", t: "Nach etwa 15 Wäschen bildet sich am Bund Pilling. Ist das normal bei dem Preis?" },
+  { b: "Naht offen", t: "Bei einem Teil ist nach drei Wochen die Seitennaht aufgegangen. Foto im Anhang." },
+  { b: "Farbe verwaschen", t: "Die dunkelblaue Farbe ist nach fünf Wäschen deutlich blasser. Habe kalt gewaschen." },
+  { b: "Gummi ausgeleiert", t: "Das Unterbrustband ist nach zwei Monaten ausgeleiert und hält nicht mehr." },
+  { b: "Nachbestellung Farbe", t: "Wann kommt Nebelgrau in M wieder rein? Steht seit Wochen auf nicht verfügbar." },
+  { b: "wieder verfügbar", t: "Ist der Body Fee in L irgendwann wieder lieferbar oder ausgelaufen?" },
+  { b: "Preis Aktion", t: "Ich habe letzte Woche zum Vollpreis gekauft, jetzt ist Sale. Bekomme ich die Differenz?" },
+  { b: "zu teuer", t: "39 Euro für einen Slip finde ich sehr viel. Gibt es Mengenrabatt bei mehreren?" },
+  { b: "Gutschein geht nicht", t: "Mein Willkommensgutschein wird im Warenkorb nicht angenommen." },
+  { b: "Material Frage", t: "Enthält das Modal? Ich reagiere auf bestimmte Kunstfasern und finde die Zusammensetzung nicht." },
+  { b: "Allergie", t: "Ich habe Neurodermitis. Sind die Nähte flach oder eingenäht?" },
+  { b: "Herkunft", t: "Wo wird produziert? Auf der Seite steht nachhaltig, aber nicht wo genau." },
+  { b: "GOTS", t: "Ist die Baumwolle GOTS-zertifiziert? Ich finde kein Siegel." },
+  { b: "Geschenk umtauschen", t: "Ich habe das verschenkt und es passt nicht. Kann die Empfängerin ohne Rechnung tauschen?" },
+  { b: "Geschenkverpackung", t: "Kann ich die Geschenkverpackung nachträglich dazubuchen?" },
+  { b: "falsch geliefert", t: "Ich habe den Slip Greta bestellt und die Panty Marla bekommen." },
+  { b: "zwei mal abgebucht", t: "Der Betrag wurde zweimal abgebucht. Bitte eine Buchung stornieren." },
+  { b: "Konto löschen", t: "Bitte löschen Sie mein Kundenkonto und alle Daten." },
+  { b: "Newsletter abmelden", t: "Ich bekomme weiter Newsletter, obwohl ich abgemeldet habe." },
+  { b: "Sport geeignet", t: "Ist das Bralette für Sport geeignet? Auf der Seite steht dazu nichts." },
+  { b: "unter weiss", t: "Zeichnet sich die nudefarbene Variante unter weissen Shirts ab?" },
+  { b: "Stillzeit", t: "Ist das für die Stillzeit geeignet oder gibt es dafür ein anderes Modell?" },
+];

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Quote, ReportData, THEME_LABELS } from "@/lib/pipeline/types";
+import { QUELLE_KURZ, QUELLE_LABELS, Quote, ReportData, THEME_LABELS } from "@/lib/pipeline/types";
 import { fill, report as t } from "@/content/copy";
 
 // Alle Texte dieses Reports stehen in src/content/copy.ts unter "report".
@@ -9,6 +9,11 @@ function QuoteCard({ q, white }: { q: Quote; white?: boolean }) {
     <blockquote className={`rounded-2xl border-[2.5px] border-ink ${white ? "bg-white" : "bg-cream"} p-4 text-sm font-medium`}>
       <p>„{q.text}"</p>
       <footer className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold opacity-60">
+        {q.quelle && q.quelle !== "bewertung" && (
+          <span className="rounded-md border border-ink bg-cream-2 px-1.5 py-0.5 not-italic">
+            {QUELLE_KURZ[q.quelle]}
+          </span>
+        )}
         {q.author && <span>{q.author}</span>}
         {q.rating !== undefined && <span>· {q.rating}★</span>}
         {q.date && <span>· {q.date}</span>}
@@ -210,6 +215,54 @@ export default function ReportView({
               </span>
             ))}
           </div>
+
+          {(data.quellenluecken?.length ?? 0) > 0 && (
+            <>
+              <SectionTitle
+                title={t.lueckenTitel}
+                chip={fill(t.lueckenChip, { anzahl: data.quellenluecken!.length })}
+                chipBg="bg-ink text-pop-yellow"
+              />
+              <p className="mb-6 text-sm font-medium">{t.lueckenText}</p>
+              <div className="space-y-5">
+                {data.quellenluecken!.map((l) => {
+                  const spitze = l.jeQuelle.find((q) => q.quelle === l.auffaelligste);
+                  const bew = l.jeQuelle.find((q) => q.quelle === "bewertung");
+                  return (
+                    <article key={l.theme} className="rounded-3xl border-[3px] border-ink bg-white p-6 shadow-pop-sm">
+                      <div className="mb-3 flex flex-wrap items-center gap-3">
+                        <h3 className="font-heavy text-lg">{THEME_LABELS[l.theme]}</h3>
+                        <span className="font-heavy rounded-full border-2 border-ink bg-pop-pink px-3 py-1 text-[11px] uppercase">
+                          {fill(t.lueckenAbstand, { punkte: l.mehrAlsBewertungen })}
+                        </span>
+                      </div>
+                      <p className="mb-4 text-sm font-bold">
+                        {fill(t.lueckenZeile, {
+                          anteil: spitze?.anteilPct ?? 0,
+                          quelle: QUELLE_LABELS[l.auffaelligste],
+                          bewertungen: bew?.anteilPct ?? 0,
+                        })}
+                      </p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {l.quotes.map((q, j) => <QuoteCard key={j} q={q} />)}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+              {(data.quellenSplit?.length ?? 0) > 1 && (
+                <p className="mt-4 text-xs font-medium opacity-70">
+                  {fill(t.lueckenGrundwert, {
+                    liste: data.quellenSplit!
+                      .map((q) => fill(t.lueckenGrundwertTeil, {
+                        quelle: QUELLE_LABELS[q.quelle], anzahl: q.count, positiv: q.positivPct,
+                      }))
+                      .join(" · "),
+                  })}
+                </p>
+              )}
+            </>
+          )}
 
           <SectionTitle title={t.themenTitel} />
           <div className="mt-4 overflow-hidden rounded-2xl border-[3px] border-ink bg-white shadow-pop-sm">

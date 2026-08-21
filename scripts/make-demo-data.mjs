@@ -15,6 +15,8 @@ import haltbarkeit from "./demo/03-haltbarkeit.mjs";
 import groesse from "./demo/04-groesse.mjs";
 import { preis, optik, alltag } from "./demo/05-preis-optik-alltag.mjs";
 import { nachhaltigkeit, service, geschenk, scrollstopper, kurz, pii, junk, seeding } from "./demo/06-rest.mjs";
+import support from "./demo/07-support.mjs";
+import kommentare from "./demo/08-kommentare.mjs";
 
 // Deterministischer Zufall, damit der Datensatz reproduzierbar bleibt.
 let seed = 7;
@@ -58,6 +60,21 @@ const csv = zeilen.map((r) => r.map((c) => `"${String(c).replaceAll('"', '""')}"
 writeFileSync(new URL("../demo/merle-reviews.csv", import.meta.url), csv);
 
 const handgeschrieben = [passform, material, haltbarkeit, groesse, preis, optik, alltag, nachhaltigkeit, service, geschenk, scrollstopper].reduce((a, g) => a + g.length, 0);
+// Support-Export im Format eines Helpdesk-Systems (Zendesk/Gorgias-nah).
+const supportZeilen = [["subject", "description", "created_at"]];
+for (const t of support) {
+  supportZeilen.push([t.b, t.t, datum(rnd() < 0.6)]);
+}
+writeFileSync(
+  new URL("../demo/merle-support.csv", import.meta.url),
+  supportZeilen.map((r) => r.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(",")).join("\n")
+);
+
+// Kommentare: einer pro Zeile, so wie man sie aus einem Beitrag kopiert.
+writeFileSync(new URL("../demo/merle-kommentare.txt", import.meta.url), kommentare.join("\n"));
+
+console.log(`geschrieben: demo/merle-support.csv (${support.length} Anfragen)`);
+console.log(`geschrieben: demo/merle-kommentare.txt (${kommentare.length} Kommentare)`);
 console.log(`geschrieben: demo/merle-reviews.csv`);
 console.log(`  ${zeilen.length - 1} Zeilen gesamt`);
 console.log(`  ${handgeschrieben} einzeln geschriebene Bewertungen`);

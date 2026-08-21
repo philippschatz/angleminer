@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getReport, markPaid } from "@/lib/store";
 import ReportView from "@/components/ReportView";
 import { report as t } from "@/content/copy";
+import { demoReport } from "@/content/demo-report";
 import ProcessUpgrade from "@/components/ProcessUpgrade";
 import PrintButton from "@/components/PrintButton";
 import BuyButton from "@/components/BuyButton";
@@ -33,6 +34,15 @@ export default async function ReportPage({
   const { session_id } = await searchParams;
 
   let report = await getReport(id);
+
+  // Der Beispiel-Report liegt als fertiges Dokument im Code. So ist /r/demo in
+  // jeder Umgebung sofort erreichbar — auch bevor irgendetwas geseedet wurde.
+  if (!report && id === "demo") {
+    report = {
+      id: "demo", status: "ready", paid: true, data: demoReport,
+      createdAt: demoReport.createdAt,
+    };
+  }
   if (!report) notFound();
 
   if (!report.paid && session_id) {

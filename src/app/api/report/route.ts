@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { heuristicTag } from "@/lib/pipeline/tagger";
 import { buildReport } from "@/lib/pipeline/aggregate";
-import { RawReview } from "@/lib/pipeline/types";
+import { RawReview, QUELLEN } from "@/lib/pipeline/types";
 import { saveReport } from "@/lib/store";
 import { MAX_REVIEWS, MIN_NACH_REINIGUNG } from "@/lib/pipeline/browser";
 import { fehler, upload as uploadCopy } from "@/content/copy";
@@ -24,6 +24,7 @@ const ReviewSchema = z.object({
   text: z.string().min(1).max(4000),
   rating: z.number().min(0).max(5).optional(),
   date: z.string().max(20).optional(),
+  quelle: z.enum(QUELLEN).optional(),
 });
 
 const BodySchema = z.object({
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
       body: r.text,
       rating: r.rating,
       date: r.date,
+      quelle: r.quelle,
     }));
 
     const id = nanoid(12);

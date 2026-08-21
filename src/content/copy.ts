@@ -230,6 +230,18 @@ export const report = {
   wortlisteText:
     "Die Wörter deiner Kunden, nach Häufigkeit (pro Bewertung einmal gezählt). Copy, die konvertiert, klingt so.",
 
+  // Quellenvergleich — nur sichtbar, wenn mehr als eine Quelle geliefert wurde.
+  lueckenTitel: "Was Bewertungen verschweigen",
+  lueckenChip: "{anzahl} Fundstellen",
+  lueckenText:
+    "Bewertungen entstehen öffentlich, oft auf eine Erinnerungsmail hin, in guter Stimmung. Support-Anfragen und Kommentare entstehen, wenn jemand ein Problem oder eine Frage hat. Hier stehen die Themen, die in den anderen Quellen deutlich mehr Raum einnehmen als in deinen Bewertungen — sortiert nach Abstand.",
+  lueckenZeile: "{anteil} % der {quelle} · in Bewertungen nur {bewertungen} %",
+  lueckenAbstand: "+{punkte} Punkte",
+  lueckenGrundwert:
+    "Zur Einordnung: {liste}. Dass Support kritischer klingt als Bewertungen, ist normal — verglichen wird deshalb der Raum, den ein Thema einnimmt, nicht die Stimmung.",
+  lueckenGrundwertTeil: "{quelle} {anzahl} Texte, {positiv} % positiv",
+  quellenBadge: "{quelle}",
+
   themenTitel: "Alle Themen",
   themenSpalteThema: "Thema",
   themenSpalteNennungen: "Nennungen",
