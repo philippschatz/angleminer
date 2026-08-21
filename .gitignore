@@ -42,7 +42,7 @@ next-env.d.ts
 
 .data/
 .env
-demo/*.csv
+# demo/*.csv - jetzt eingecheckt: der Beispiel-Report braucht die Daten in Produktion
 
 # Enthaelt Geheimnisse zum Kopieren nach Vercel - nie einchecken
 VERCEL-VARIABLEN.txt

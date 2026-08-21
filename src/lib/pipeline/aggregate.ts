@@ -4,7 +4,7 @@ import {
 
 // Alles hier ist deterministisch. Kein LLM zählt, rankt oder erfindet Zahlen.
 
-const STOPWORDS = new Set(("aber alle allem allen aller alles als also am an andere anderen anderer anderes auch auf aus bei bin bis bist da damit dann das dass dazu dein deine dem den denn der des dessen dich die dies diese diesem diesen dieser dieses dir doch dort du durch ein eine einem einen einer eines einfach er es etwas euch euer eure für gegen gewesen hab habe haben hat hatte hatten hier hin hinter ich ihm ihn ihnen ihr ihre im in indem ins ist ja jede jedem jeden jeder jedes jetzt kann kein keine keinem keinen keiner keines können könnte machen man manche mein meine mich mir mit muss musste nach nicht nichts noch nun nur ob oder ohne sehr sein seine sich sie sind so solche soll sollte sondern sonst über um und uns unser unter vom von vor war waren was weil weiter wenn wer werde werden wie wieder will wir wird wirst wo wurde würde zu zum zur zwar mal schon ganz gar mehr immer bin bekommen echt halt eben genau gerne total wirklich absolut super toll gut schön find finde ich's hab's").split(" "));
+const STOPWORDS = new Set(("aber alle allem allen aller alles als also am an andere anderen anderer anderes auch auf aus bei bin bis bist da damit dann das dass dazu dein deine dem den denn der des dessen dich die dies diese diesem diesen dieser dieses dir doch dort du durch ein eine einem einen einer eines einfach er es etwas euch euer eure für gegen gewesen hab habe haben hat hatte hatten hier hin hinter ich ihm ihn ihnen ihr ihre im in indem ins ist ja jede jedem jeden jeder jedes jetzt kann kein keine keinem keinen keiner keines können könnte machen man manche mein meine mich mir mit muss musste nach nicht nichts noch nun nur ob oder ohne sehr sein seine sich sie sind so solche soll sollte sondern sonst über um und uns unser unter vom von vor war waren was weil weiter wenn wer werde werden wie wieder will wir wird wirst wo wurde würde zu zum zur zwar mal schon ganz gar mehr immer bin bekommen echt halt eben genau gerne total wirklich absolut super toll gut schön find finde ich's hab's beim zwei drei vier mein meinem meine meiner wollte wollen sieht sehen teil teile ganze ganzen andere anderen wieder etwas seit dann noch nach jetzt beide bisher deshalb sowie dabei davon dazu damit").split(" "));
 
 function wordLexicon(reviews: TaggedReview[], top = 30): WordEntry[] {
   const counts = new Map<string, number>();
@@ -50,6 +50,29 @@ function pickDiverse(candidates: TaggedReview[], n: number): TaggedReview[] {
   return picked;
 }
 
+/**
+ * Wie brauchbar ist dieses Zitat fuer ein Ad-Briefing?
+ *
+ * Vorher wurde nach kuerzester Laenge sortiert - dadurch gewannen generische
+ * Einzeiler ("Super Qualitaet, tolle Passform") gegen konkrete Schilderungen
+ * ("Ich habe 75B und finde nie was, das ohne Buegel haelt"). Fuer ein Briefing
+ * ist das genau falsch: Der Wert eines Zitats steckt im Konkreten.
+ *
+ * Alles hier ist deterministisch - kein Modell entscheidet, was ein gutes
+ * Zitat ist.
+ */
+const KONKRET = /\b(endlich|statt|vorher|sonst|trotzdem|obwohl|zum ersten mal|seit|nach \d|weil)\b/i;
+
+function zitatGuete(r: TaggedReview): number {
+  const len = r.body.length;
+  let s = r.tags.emotion * 2;
+  if (len >= 60 && len <= 240) s += 3;      // die brauchbare Spanne
+  if (len < 45) s -= 4;                      // zu generisch, um zu tragen
+  if (/\d/.test(r.body)) s += 2;             // Groessen, Waschzahlen, Zeitraeume
+  if (KONKRET.test(r.body)) s += 2;          // Kontrast, Vorgeschichte, Wendepunkt
+  return s;
+}
+
 function toQuote(r: TaggedReview): Quote {
   return {
     text: r.body.length > 280 ? r.body.slice(0, 277) + "…" : r.body,
@@ -64,18 +87,24 @@ function toQuote(r: TaggedReview): Quote {
 function trendFor(reviews: TaggedReview[], all: TaggedReview[]): Angle["trend"] {
   const dated = reviews.filter((r) => r.date);
   const allDated = all.filter((r) => r.date);
-  if (dated.length < 10 || allDated.length < 30) return "unklar";
+  // Unter diesen Schwellen ist ein "Trend" statistisches Rauschen. Lieber
+  // "unklar" ausweisen als eine Richtung behaupten, die niemand nachrechnen kann.
+  if (dated.length < 15 || allDated.length < 60) return "unklar";
   const dates = allDated.map((r) => Date.parse(r.date!)).sort((a, b) => a - b);
   const t0 = dates[0];
   const t1 = dates[dates.length - 1];
   if (t1 - t0 < 1000 * 60 * 60 * 24 * 60) return "unklar"; // < 2 Monate Spanne
   const mid = t0 + (t1 - t0) / 2;
-  const allEarly = allDated.filter((r) => Date.parse(r.date!) < mid).length || 1;
-  const allLate = allDated.length - allEarly || 1;
-  const early = dated.filter((r) => Date.parse(r.date!) < mid).length / allEarly;
-  const late = dated.filter((r) => Date.parse(r.date!) >= mid).length / allLate;
-  if (late > early * 1.3) return "steigend";
-  if (late < early * 0.7) return "fallend";
+
+  // Bewusst absolute Haeufigkeit je Zeithaelfte, nicht der Anteil am Gesamt.
+  // Mit Anteilen wuerde jedes Thema "fallend" heissen, sobald ein anderes stark
+  // zulegt - obwohl seine Nennungen gleich geblieben sind. Ein Kunde liest
+  // "fallend" aber als Rueckgang, nicht als Verschiebung.
+  const frueh = dated.filter((r) => Date.parse(r.date!) < mid).length;
+  const spaet = dated.length - frueh;
+  if (frueh < 5 || spaet < 5) return "unklar";
+  if (spaet > frueh * 1.4) return "steigend";
+  if (spaet < frueh * 0.65) return "fallend";
   return "stabil";
 }
 
@@ -137,9 +166,15 @@ export function buildReport(args: {
     const rs = tagged.filter((r) => r.tags.themes.includes(tc.theme));
     const positives = rs.filter((r) => r.tags.sentiment === "positiv");
     const avgEmotion = rs.reduce((a, r) => a + r.tags.emotion, 0) / rs.length;
-    const adReadyCandidates = positives
-      .filter((r) => r.tags.adReady)
-      .sort((a, b) => b.tags.emotion - a.tags.emotion || a.body.length - b.body.length);
+    // Zitate, deren erstes (staerkstes) Thema dieses Thema ist, zaehlen zuerst.
+    // Sonst landen unter "Haltbarkeit" Zitate, die eigentlich von der Passform
+    // erzaehlen und das Thema nur am Rand beruehren.
+    const nachGuete = (a: TaggedReview, b: TaggedReview) => zitatGuete(b) - zitatGuete(a);
+    const passend = positives.filter((r) => r.tags.adReady);
+    const adReadyCandidates = [
+      ...passend.filter((r) => r.tags.themes[0] === tc.theme).sort(nachGuete),
+      ...passend.filter((r) => r.tags.themes[0] !== tc.theme).sort(nachGuete),
+    ];
     const adReadyQuotes = pickDiverse(adReadyCandidates, 5).map(toQuote);
     // Score: Häufigkeit × Emotionalität × Ad-Eignung
     const score = tc.count * (1 + avgEmotion) * (adReadyQuotes.length > 0 ? 1.5 : 0.6);
@@ -174,7 +209,9 @@ export function buildReport(args: {
     .map(([summary, rs]) => {
       const theme = rs[0].tags.themes[0];
       const counters = pickDiverse(
-        tagged.filter((r) => r.tags.sentiment === "positiv" && r.tags.adReady && r.tags.themes.includes(theme) && !r.tags.isObjection),
+        tagged
+          .filter((r) => r.tags.sentiment === "positiv" && r.tags.adReady && r.tags.themes.includes(theme) && !r.tags.isObjection)
+          .sort((a, b) => zitatGuete(b) - zitatGuete(a)),
         3
       ).map(toQuote);
       return {
@@ -188,7 +225,7 @@ export function buildReport(args: {
   // Scrollstopper
   const scrollstoppers = tagged
     .filter((r) => r.tags.scrollstopper)
-    .sort((a, b) => b.tags.emotion - a.tags.emotion)
+    .sort((a, b) => zitatGuete(b) - zitatGuete(a))
     .slice(0, 15)
     .map(toQuote);
 
