@@ -22,6 +22,14 @@ export const QUELLE_LABELS: Record<Quelle, string> = {
   mail: "Postfach",
 };
 
+/** Genitiv-Form fuer Saetze wie "23 % der Support-Anfragen". */
+export const QUELLE_GENITIV: Record<Quelle, string> = {
+  bewertung: "Bewertungen",
+  support: "Support-Anfragen",
+  kommentar: "Kommentare",
+  mail: "Postfach-Nachrichten",
+};
+
 /** Kurzform fuer die Herkunftsmarkierung an einzelnen Zitaten. */
 export const QUELLE_KURZ: Record<Quelle, string> = {
   bewertung: "Bewertung",

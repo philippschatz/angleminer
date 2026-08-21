@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { QUELLE_KURZ, QUELLE_LABELS, Quote, ReportData, THEME_LABELS } from "@/lib/pipeline/types";
+import { QUELLE_GENITIV, QUELLE_KURZ, QUELLE_LABELS, Quote, ReportData, THEME_LABELS } from "@/lib/pipeline/types";
 import { fill, report as t } from "@/content/copy";
 
 // Alle Texte dieses Reports stehen in src/content/copy.ts unter "report".
@@ -239,7 +239,7 @@ export default function ReportView({
                       <p className="mb-4 text-sm font-bold">
                         {fill(t.lueckenZeile, {
                           anteil: spitze?.anteilPct ?? 0,
-                          quelle: QUELLE_LABELS[l.auffaelligste],
+                          quelle: QUELLE_GENITIV[l.auffaelligste],
                           bewertungen: bew?.anteilPct ?? 0,
                         })}
                       </p>
