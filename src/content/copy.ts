@@ -239,6 +239,17 @@ export const report = {
     "Zahlung ist da. Jetzt wird jede einzelne Bewertung gelesen und einsortiert. Du kannst diese Seite ruhig schließen — es läuft ohne dich weiter, und du bekommst eine Mail, sobald der Report fertig ist.",
   verarbeitungFortschritt: "{erledigt} von {gesamt} Bewertungen gelesen",
 
+  // Nur im Beispiel-Report sichtbar. Ohne den Hinweis fragt sich ein Besucher
+  // aus einer anderen Branche, was ihn Waesche angeht - und ohne den Kasten am
+  // Ende kann er nicht kaufen, obwohl er gerade ueberzeugt wurde.
+  demoBanner:
+    "Das ist ein Beispiel-Report aus echten, anonymisierten Bewertungen einer Wäschemarke. Genauso funktioniert er für Skincare, Food, Möbel oder Sportgeräte — die Themen findet die Analyse in deinen Daten selbst.",
+  demoCtaTitel: "Das war eine fremde Marke.",
+  demoCtaText:
+    "Jetzt mit deinen Bewertungen: Datei rein, Vorschau sofort und kostenlos. Bezahlt wird erst, wenn du gesehen hast, dass sich der Report lohnt.",
+  demoCtaButton: "Eigene Bewertungen hochladen",
+  demoCtaFussnote: "Vorschau gratis · 49 € einmalig · kein Abo",
+
   pdfButton: "PDF ⬇",
 
   fusszeile:

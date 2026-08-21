@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getReport, markPaid } from "@/lib/store";
 import ReportView from "@/components/ReportView";
+import { report as t } from "@/content/copy";
 import ProcessUpgrade from "@/components/ProcessUpgrade";
 import PrintButton from "@/components/PrintButton";
 import BuyButton from "@/components/BuyButton";
@@ -42,6 +43,7 @@ export default async function ReportPage({
     }
   }
 
+  const istDemo = id === "demo";
   const unlocked = report.paid;
   const needsUpgrade = report.paid && report.status !== "ready";
 
@@ -53,8 +55,24 @@ export default async function ReportPage({
         </Link>
         {unlocked && <PrintButton />}
       </nav>
+      {istDemo && (
+        <p className="mb-8 rounded-2xl border-[3px] border-ink bg-pop-blue px-5 py-4 text-sm font-medium text-white shadow-pop-sm print:hidden">
+          {t.demoBanner}
+        </p>
+      )}
       {needsUpgrade && <ProcessUpgrade reportId={id} />}
       <ReportView data={report.data} unlocked={unlocked} kaufBereich={<BuyButton reportId={id} />} />
+
+      {istDemo && (
+        <section className="my-12 -rotate-[0.4deg] rounded-3xl border-[3px] border-ink bg-pop-pink px-8 py-10 text-center shadow-pop-lg print:hidden">
+          <h2 className="font-heavy mb-2 text-3xl uppercase">{t.demoCtaTitel}</h2>
+          <p className="mx-auto mb-6 max-w-md font-medium">{t.demoCtaText}</p>
+          <Link href="/new" className="pop-press inline-block rounded-2xl border-[3px] border-ink bg-pop-yellow px-8 py-4 font-bold shadow-pop">
+            {t.demoCtaButton}
+          </Link>
+          <p className="mt-4 text-xs font-bold">{t.demoCtaFussnote}</p>
+        </section>
+      )}
     </main>
   );
 }
